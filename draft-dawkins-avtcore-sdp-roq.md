@@ -19,11 +19,11 @@
 # Change the file extension to match the format (.xml for XML, etc...)
 #
 ###
-title: "TODO - Your title"
-abbrev: "TODO - Abbreviation"
-category: info
+title: SDP Offer/Answer for RTP over QUIC (RoQ)
+abbrev: SDP O/A for RoQ
+category: std
 
-docname: draft-todo-yourname-protocol-latest
+docname: draft-dawkins-avtcore-sdp-roq-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
