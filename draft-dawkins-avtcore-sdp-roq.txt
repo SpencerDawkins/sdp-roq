@@ -1,0 +1,514 @@
+
+
+
+
+Audio/Video Transport Core Maintenance                        S. Dawkins
+Internet-Draft                                       Tencent America LLC
+Intended status: Standards Track                              V. Pascual
+Expires: 5 December 2024                                           Nokia
+                                                             3 June 2024
+
+
+                SDP Offer/Answer for RTP over QUIC (RoQ)
+                  draft-dawkins-avtcore-sdp-roq-latest
+
+Abstract
+
+   This document describes these new SDP "proto" attribute values:
+   "QUIC", "QUIC/RTP/SAVP", "QUIC/RTP/AVPF", and "QUIC/RTP/SAVPF", and
+   describes how SDP Offer/Answer can be used to set up an RTP
+   connection using QUIC as a transport protocol.
+
+   These proto values are necessary to allow the use of QUIC as an
+   underlying transport protocol for applications such as SIP and WebRTC
+   that commonly use SDP as a session signaling protocol to set up RTP
+   connections.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at
+   https://SpencerDawkins.github.io/sdp-roq/draft-dawkins-avtcore-sdp-
+   roq.html.  Status information for this document may be found at
+   https://datatracker.ietf.org/doc/draft-dawkins-avtcore-sdp-roq/.
+
+   Discussion of this document takes place on the Audio/Video Transport
+   Core Maintenance Working Group mailing list (mailto:avt@ietf.org),
+   which is archived at https://mailarchive.ietf.org/arch/browse/avt/.
+   Subscribe at https://www.ietf.org/mailman/listinfo/avt/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/SpencerDawkins/sdp-roq.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 5 December 2024.
+
+Copyright Notice
+
+   Copyright (c) 2024 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+     1.1.  Scope of this document
+     1.2.  Notes for Readers
+   2.  Conventions and Definitions
+   3.  Protocol identifiers
+     3.1.  The QUIC proto
+     3.2.  The QUIC/RTP/SAVP proto
+     3.3.  The QUIC/RTP/AVPF proto
+     3.4.  The QUIC/RTP/SAVPF proto
+     3.5.  A QUIC/RTP/AVPF Offer
+     3.6.  Discussion
+   4.  Opening a QUIC connection for use with RoQ
+   5.  Implications of using ICE with SDP from RFC 8842
+   6.  Negotiating for specific QUIC feedback replacing AVP/AVPF
+           feedback
+   7.  Considerations for end-to-end payload protection
+   8.  Security Considerations
+   9.  IANA Considerations
+   10. References
+     10.1.  Normative References
+     10.2.  Informative References
+   Acknowledgments
+   Authors' Addresses
+
+1.  Introduction
+
+   This document describes these new SDP "proto" attribute values:
+   "QUIC", "QUIC/RTP/SAVP", "QUIC/RTP/AVPF", and "QUIC/RTP/SAVPF", and
+   describes how SDP Offer/Answer ([RFC3264]) can be used to set up an
+   RTP ([RFC3550]) connection using QUIC ([RFC9000] and related
+   specifications).
+
+   These proto values are necessary to allow the use of QUIC as an
+   underlying transport protocol for applications such as SIP
+   ([RFC3261]) and WebRTC ([RFC8825]) that commonly use SDP as a session
+   signaling protocol to set up RTP connections.
+
+1.1.  Scope of this document
+
+   This document focuses on the IANA registration and description of the
+   RTP sessions using SDP Offer/Answer, as would be the case for many
+   current RTP applications in common use, such as SIP ([RFC3261]) and
+   WebRTC ([RFC8825]).
+
+   This document is intended as complementary to drafts such as
+   [I-D.ietf-avtcore-rtp-over-quic], which largely focus on RTP/RTCP
+   encapsulation in QUIC, so that the SDP experts can focus on SDP
+   offer/answer aspects, and the RTP experts can focus on RTP/RTCP
+   encapsulation aspects.
+
+1.2.  Notes for Readers
+
+   (Note to RFC Editor - if this document ever reaches you, please
+   remove this section)
+
+   This document is intended for publication as a standards-track RFC in
+   the IETF stream, but has not been adopted by any IETF working group,
+   and does not carry any special status within the IETF.
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+3.  Protocol identifiers
+
+   This document defines the following QUIC AVP profiles, in order to
+   allow existing SIP and RTCWEB RTP applications to migrate more easily
+   to QUIC:
+
+   *  RTP/AVPF ("Extended RTP Profile for Real-time Transport Control
+      Protocol (RTCP)-Based Feedback (RTP/AVPF)"), as defined in
+      [RFC4585].
+
+   *  RTP/SAVP ("The Secure Real-time Transport Protocol (SRTP)"), as
+      defined in [RFC3711].
+
+   *  RTP/SAVPF ("Extended Secure RTP Profile for Real-time Transport
+      Control Protocol (RTCP)-Based Feedback (RTP/SAVPF)"), as defined
+      in [RFC5124].
+
+   As much as possible, attributes used in this section are reused from
+   other specifications, with references to the original definitions.
+
+3.1.  The QUIC proto
+
+   The 'QUIC' protocol identifier is similar to the 'UDP' and 'TCP'
+   protocol identifiers in that it only describes the transport
+   protocol, and not the upper-layer protocol.
+
+   An 'm' line that specifies 'QUIC' MUST further qualify the
+   application-layer protocol using an fmt identifier, such as
+   "QUIC/RTP/AVPF".
+
+   Media described using an 'm' line containing the 'QUIC' protocol
+   identifier are carried using QUIC streams, as defined in [RFC9000],
+   or in QUIC DATAGRAMs, as defined in [RFC9221].
+
+   The following is an update to the ABNF for an 'm' line, as specified
+   by [RFC8866], that defines a new value for the QUIC protocol.
+
+      media-field =         %s"m" "=" media SP port \["/" integer\]
+                                SP proto 1*(SP fmt) CRLF
+
+      m= line parameter        parameter value(s)
+      ------------------------------------------------------------------
+      <media>:                 (unchanged from {{RFC8866}})
+      <proto>:                 'QUIC'
+      <port>:                  UDP port number
+      <fmt>:                   (unchanged from {{RFC8866}})
+
+3.2.  The QUIC/RTP/SAVP proto
+
+   The following is an update to the ABNF for an 'm' line, as specified
+   by [RFC8866], that defines a new value for the QUIC/RTP/SAVP
+   protocol.
+
+      media-field =         %s"m" "=" media SP port \["/" integer\]
+                                SP proto 1*(SP fmt) CRLF
+
+      m= line parameter        parameter value(s)
+      ------------------------------------------------------------------
+      <media>:                 (unchanged from {{RFC8866}})
+      <proto>:                 'QUIC/RTP/SAVP'
+      <port>:                  UDP port number
+      <fmt>:                   (unchanged from {{RFC8866}})
+
+3.3.  The QUIC/RTP/AVPF proto
+
+   The following is an update to the ABNF for an 'm' line, as specified
+   by [RFC8866], that defines a new value for the QUIC/RTP/AVPF
+   protocol.
+
+      media-field =         %s"m" "=" media SP port \["/" integer\]
+                                SP proto 1*(SP fmt) CRLF
+
+      m= line parameter        parameter value(s)
+      ------------------------------------------------------------------
+      <media>:                 (unchanged from {{RFC8866}})
+      <proto>:                 'QUIC/RTP/AVPF'
+      <port>:                  UDP port number
+      <fmt>:                   (unchanged from {{RFC8866}})
+
+3.4.  The QUIC/RTP/SAVPF proto
+
+   The following is an update to the ABNF for an 'm' line, as specified
+   by [RFC8866], that defines a new value for the QUIC/RTP/SAVPF
+   protocol.
+
+      media-field =         %s"m" "=" media SP port \["/" integer\]
+                                SP proto 1*(SP fmt) CRLF
+
+      m= line parameter        parameter value(s)
+      ------------------------------------------------------------------
+      <media>:                 (unchanged from {{RFC8866}})
+      <proto>:                 'QUIC/RTP/SAVPF'
+      <port>:                  UDP port number
+      <fmt>:                   (unchanged from {{RFC8866}})
+
+3.5.  A QUIC/RTP/AVPF Offer
+
+   A complete example of an SDP offer using QUIC/RTP/AVPF might look
+   like:
+
+   +================================+=================================+
+   | SDP line                       | Notes                           |
+   +================================+=================================+
+   | v=0                            | Same as [RFC8866]               |
+   +--------------------------------+---------------------------------+
+   | o=jdoe 3724394400 3724394405   | Same as [RFC8866]               |
+   | IN IP4 198.51.100.1            |                                 |
+   +--------------------------------+---------------------------------+
+   | s=Call to John Smith           | Same as [RFC8866]               |
+   +--------------------------------+---------------------------------+
+   | i=SDP Offer #1                 | Same as [RFC8866]               |
+   +--------------------------------+---------------------------------+
+   | u=http://www.jdoe.example.com/ | Same as [RFC8866]               |
+   | home.html                      |                                 |
+   +--------------------------------+---------------------------------+
+   | e=Jane Doe                     | Same as [RFC8866]               |
+   | jane@jdoe.example.com          |                                 |
+   | (mailto:jane@jdoe.example.com) |                                 |
+   +--------------------------------+---------------------------------+
+   | p=+1 617 555-6011              | Same as [RFC8866]               |
+   +--------------------------------+---------------------------------+
+   | c=IN IP4 198.51.100.1          | Same as [RFC8866]               |
+   +--------------------------------+---------------------------------+
+   | t=0 0                          | Same as [RFC8866]               |
+   +--------------------------------+---------------------------------+
+   | m=audio 49170 RTP/AVP 0        | Same as [RFC8866]               |
+   +--------------------------------+---------------------------------+
+   | m=audio 49180 RTP/AVP 0        | Same as [RFC8866]               |
+   +--------------------------------+---------------------------------+
+   | m=video 51372 QUIC/RTP/AVPF 99 | QUIC transport                  |
+   +--------------------------------+---------------------------------+
+   | a=setup:passive                | will wait for QUIC handshake    |
+   |                                | (setup attribute from           |
+   |                                | [RFC4145])                      |
+   +--------------------------------+---------------------------------+
+   | a=connection:new               | don't want to reuse an existing |
+   |                                | QUIC connection (connection     |
+   |                                | attribute from [RFC4145])       |
+   +--------------------------------+---------------------------------+
+   | c=IN IP6 2001:db8::2           | Same as [RFC8866]               |
+   +--------------------------------+---------------------------------+
+   | a=rtpmap:99 h266/90000         | H.266 VVC codec                 |
+   |                                | [I-D.ietf-avtcore-rtp-vvc]      |
+   +--------------------------------+---------------------------------+
+
+                                 Table 1
+
+   This example is largely based on an example appearing in [RFC8866],
+   Section 5, but is using QUIC/RTP/AVPF to support a newer codec.
+
+   Because QUIC uses connections for both streams and datagrams, we are
+   reusing two session- and media-level SDP attributes from
+   [SDP-attribute-name] that were defined in [RFC4145] for use with TCP:
+   setup and connection.
+
+   This example SDP offer might be included in a SIP Invite.
+
+3.6.  Discussion
+
+   "QUIC", "QUIC/RTP/SAVP", "QUIC/RTP/AVPF", and "QUIC/RTP/SAVPF" are
+   defined in the document now.
+
+   I'd like to minimize the number of protocol identifiers, based on
+   identified needs rather than anticipated needs.  Is it necessary to
+   also define QUIC/RTP/AVP, or would that just be for completeness?
+
+   This document currently includes secure profiles for middlebox
+   support of legacy RTP endpoints.  The thinking is that if a RoQ
+   endpoint is communicating with a non-RoQ RTP endpoint using an RTP
+   middlebox, the RoQ endpoint might reasonably use an insecure AVP
+   profile when sending to the middlebox, but that endpoint doesn't have
+   any way to control whether the RTP middlebox uses a secure profile
+   when exchanging RTP with a non-RoQ endpoint.
+
+   RoQ allows the encapsulation of RTP in both QUIC streams and in QUIC
+   DATAGRAMs.  We will include "stream" and "dgram" variants of any
+   profiles we define.
+
+   We've talked (a LOT) about including variants that failover to
+   TCP/UDP/QUIC transport if UDP is blocked, so that an endpoint can
+   proceed after ICE candidate probing, but can we assume that
+   applications that can do other encapsulations will offer protocol
+   identifiers for those encapsulations, in addition to "QUIC/RTP/AVPF"
+   and related protocol identifiers?
+
+4.  Opening a QUIC connection for use with RoQ
+
+   QUIC authentication with a "roq" ALPN or other ALPN, as described in
+   Section 4.1 of draft-ietf-avtcore-rtp-over-quic
+
+   Things to remember for this section
+
+   *  SDP "setup" attribute, defined in [RFC4145] (a=setup:active,
+      passive, actpass, holdconn)
+
+   *  SDP "connection" attribute, defined in [RFC4145]
+      (a=connection:new, existing)
+
+   *  Check QUIC support of "rtcp-mux"
+
+   *  Check QUIC impacts on BUNDLE
+
+   *  Interaction with UDP-Connect to open pinholes in corporate
+      proxies?
+
+5.  Implications of using ICE with SDP from RFC 8842
+
+   Things to remember in this section
+
+   *  SDP "fingerprint" attribute, defined in [RFC8122]
+
+   *  SDP "tls-id" attribute, defined in [RFC8842]
+
+   *  QUIC address validation and ICE candidate pairs
+
+   *  QUIC Ping frames and ICE consent freshness (RFC 7675)# Interaction
+      with Other RTP extensions
+
+6.  Negotiating for specific QUIC feedback replacing AVP/AVPF feedback
+
+   Things to remember in this section
+
+   *  What we might say about RFC 4585 AVPF
+
+   *  What we might say about RFC 5104 Codec Control Messages
+
+   *  What we might say about RFC 8888 congestion control
+
+7.  Considerations for end-to-end payload protection
+
+   Things to remember in this section
+
+   *  Technical solution - support SFRAME
+
+   *  Human solution - require conformant RoQ middleboxes to bridge
+      between RoQ and secure profiles (no RoQ=>AVP, no RoQ=>AVPF)
+
+8.  Security Considerations
+
+   TODO Security
+
+9.  IANA Considerations
+
+   TODO IANA Considerations from Section 3.
+
+10.  References
+
+10.1.  Normative References
+
+   [I-D.ietf-avtcore-rtp-over-quic]
+              Ott, J., Engelbart, M., and S. Dawkins, "RTP over QUIC
+              (RoQ)", Work in Progress, Internet-Draft, draft-ietf-
+              avtcore-rtp-over-quic-10, 8 May 2024,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-avtcore-
+              rtp-over-quic-10>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC3264]  Rosenberg, J. and H. Schulzrinne, "An Offer/Answer Model
+              with Session Description Protocol (SDP)", RFC 3264,
+              DOI 10.17487/RFC3264, June 2002,
+              <https://www.rfc-editor.org/rfc/rfc3264>.
+
+   [RFC3550]  Schulzrinne, H., Casner, S., Frederick, R., and V.
+              Jacobson, "RTP: A Transport Protocol for Real-Time
+              Applications", STD 64, RFC 3550, DOI 10.17487/RFC3550,
+              July 2003, <https://www.rfc-editor.org/rfc/rfc3550>.
+
+   [RFC3711]  Baugher, M., McGrew, D., Naslund, M., Carrara, E., and K.
+              Norrman, "The Secure Real-time Transport Protocol (SRTP)",
+              RFC 3711, DOI 10.17487/RFC3711, March 2004,
+              <https://www.rfc-editor.org/rfc/rfc3711>.
+
+   [RFC4145]  Yon, D. and G. Camarillo, "TCP-Based Media Transport in
+              the Session Description Protocol (SDP)", RFC 4145,
+              DOI 10.17487/RFC4145, September 2005,
+              <https://www.rfc-editor.org/rfc/rfc4145>.
+
+   [RFC4585]  Ott, J., Wenger, S., Sato, N., Burmeister, C., and J. Rey,
+              "Extended RTP Profile for Real-time Transport Control
+              Protocol (RTCP)-Based Feedback (RTP/AVPF)", RFC 4585,
+              DOI 10.17487/RFC4585, July 2006,
+              <https://www.rfc-editor.org/rfc/rfc4585>.
+
+   [RFC5124]  Ott, J. and E. Carrara, "Extended Secure RTP Profile for
+              Real-time Transport Control Protocol (RTCP)-Based Feedback
+              (RTP/SAVPF)", RFC 5124, DOI 10.17487/RFC5124, February
+              2008, <https://www.rfc-editor.org/rfc/rfc5124>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+   [RFC8866]  Begen, A., Kyzivat, P., Perkins, C., and M. Handley, "SDP:
+              Session Description Protocol", RFC 8866,
+              DOI 10.17487/RFC8866, January 2021,
+              <https://www.rfc-editor.org/rfc/rfc8866>.
+
+   [RFC9000]  Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
+              Multiplexed and Secure Transport", RFC 9000,
+              DOI 10.17487/RFC9000, May 2021,
+              <https://www.rfc-editor.org/rfc/rfc9000>.
+
+   [RFC9221]  Pauly, T., Kinnear, E., and D. Schinazi, "An Unreliable
+              Datagram Extension to QUIC", RFC 9221,
+              DOI 10.17487/RFC9221, March 2022,
+              <https://www.rfc-editor.org/rfc/rfc9221>.
+
+   [SDP-attribute-name]
+              "SDP Parameters - attribute-name", September 2021,
+              <https://www.iana.org/assignments/sdp-parameters/sdp-
+              parameters.xhtml#sdp-att-field>.
+
+   [SDP-parameters]
+              "SDP Parameters - Proto", September 2021,
+              <https://www.iana.org/assignments/sdp-parameters/sdp-
+              parameters.xhtml#sdp-parameters-2>.
+
+10.2.  Informative References
+
+   [I-D.ietf-avtcore-rtp-vvc]
+              Zhao, S., Wenger, S., Sanchez, Y., Wang, Y., and M. M.
+              Hannuksela, "RTP Payload Format for Versatile Video Coding
+              (VVC)", Work in Progress, Internet-Draft, draft-ietf-
+              avtcore-rtp-vvc-18, 4 August 2022,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-avtcore-
+              rtp-vvc-18>.
+
+   [RFC3261]  Rosenberg, J., Schulzrinne, H., Camarillo, G., Johnston,
+              A., Peterson, J., Sparks, R., Handley, M., and E.
+              Schooler, "SIP: Session Initiation Protocol", RFC 3261,
+              DOI 10.17487/RFC3261, June 2002,
+              <https://www.rfc-editor.org/rfc/rfc3261>.
+
+   [RFC8122]  Lennox, J. and C. Holmberg, "Connection-Oriented Media
+              Transport over the Transport Layer Security (TLS) Protocol
+              in the Session Description Protocol (SDP)", RFC 8122,
+              DOI 10.17487/RFC8122, March 2017,
+              <https://www.rfc-editor.org/rfc/rfc8122>.
+
+   [RFC8825]  Alvestrand, H., "Overview: Real-Time Protocols for
+              Browser-Based Applications", RFC 8825,
+              DOI 10.17487/RFC8825, January 2021,
+              <https://www.rfc-editor.org/rfc/rfc8825>.
+
+   [RFC8842]  Holmberg, C. and R. Shpount, "Session Description Protocol
+              (SDP) Offer/Answer Considerations for Datagram Transport
+              Layer Security (DTLS) and Transport Layer Security (TLS)",
+              RFC 8842, DOI 10.17487/RFC8842, January 2021,
+              <https://www.rfc-editor.org/rfc/rfc8842>.
+
+Acknowledgments
+
+   TODO acknowledge.
+
+Authors' Addresses
+
+   Spencer Dawkins
+   Tencent America LLC
+   United States of America
+   Email: spencerdawkins.ietf@gmail.com
+
+
+   Victor Pascual
+   Nokia
+   Barcelona
+   Spain
+   Email: victor.pascual_avila@nokia.com
