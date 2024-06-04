@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-02T00:55:47.355283+00:00",
+  "timestamp": "2024-06-04T00:52:53.095198+00:00",
   "repo": "SpencerDawkins/sdp-roq",
   "labels": [
     {
@@ -49,6 +49,55 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 1,
+      "id": "I_kwDOMBStD86K88gs",
+      "title": "Consider including a=fingerprint mechanism in a p2p SDP example",
+      "url": "https://github.com/SpencerDawkins/sdp-roq/issues/1",
+      "state": "OPEN",
+      "author": "SpencerDawkins",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "From @juberti on AVTCORE mailing list: \r\n\r\n> For c2s use, the SDP you have outlined should work well. For p2p usage, we should include the a=fingerprint mechanism used in https://datatracker.ietf.org/doc/html/rfc5763 to allow validation of self-signed peer certs.",
+      "createdAt": "2022-02-05T00:23:54Z",
+      "updatedAt": "2024-06-03T13:57:00Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 2,
+      "id": "I_kwDOMBStD86K89Qa",
+      "title": "Consider including a=tls-id in SDP",
+      "url": "https://github.com/SpencerDawkins/sdp-roq/issues/2",
+      "state": "OPEN",
+      "author": "SpencerDawkins",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "From @juberti, on the AVTCORE mailing list: \r\n\r\n> It would probably be a good idea for the SDP to include a=tls-id, defined in https://datatracker.ietf.org/doc/html/rfc8842, to ensure endpoints can tell when the security handshake is being restarted, as discussed in the cited RFC. This would probably obivate the need for a=connection:new as well (which is not typically used in DTLS-SRTP).",
+      "createdAt": "2022-02-05T00:21:13Z",
+      "updatedAt": "2024-06-03T13:58:17Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 3,
+      "id": "I_kwDOMBStD86K89jJ",
+      "title": "Check QUIC impacts on BUNDLE",
+      "url": "https://github.com/SpencerDawkins/sdp-roq/issues/3",
+      "state": "OPEN",
+      "author": "SpencerDawkins",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "From @cdh4u - Please remember to check whether there are any BUNDLE impacts. Section 9 of BUNDLE contains RTP considerations for BUNDLE, so I suggest to check whether there is anything that needs to be updated/modified for QUIC usage.",
+      "createdAt": "2022-01-30T00:48:23Z",
+      "updatedAt": "2024-06-03T13:58:49Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
   "pulls": []
 }
