@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-04T00:52:53.095198+00:00",
+  "timestamp": "2024-06-06T00:52:19.734350+00:00",
   "repo": "SpencerDawkins/sdp-roq",
   "labels": [
     {
@@ -95,6 +95,70 @@
       "body": "From @cdh4u - Please remember to check whether there are any BUNDLE impacts. Section 9 of BUNDLE contains RTP considerations for BUNDLE, so I suggest to check whether there is anything that needs to be updated/modified for QUIC usage.",
       "createdAt": "2022-01-30T00:48:23Z",
       "updatedAt": "2024-06-03T13:58:49Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 4,
+      "id": "I_kwDOMBStD86LNHmm",
+      "title": "Proposal for identifying RoQ Flow IDs",
+      "url": "https://github.com/SpencerDawkins/sdp-roq/issues/4",
+      "state": "OPEN",
+      "author": "samhurst",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "I've been separately experimenting with describing RoQ sessions in an implementation of my [old SIP-over-QUIC draft](https://datatracker.ietf.org/doc/draft-hurst-sip-quic/), which uses SDP offer/answer underneath.\r\n\r\nI've been prodding at this for a while and gone through a few iterations, and what I've landed on is adding a new attribute that describes the RoQ Flow Identifier.\r\n\r\nLooking at the prior-art in this area, I've found [DCCP-UDP](https://datatracker.ietf.org/doc/html/rfc6773) and [SCTP-DTLS](https://datatracker.ietf.org/doc/html/rfc8841). In both of these cases, the transport protocol carrying the RTP (DCCP and SCTP) are encapsulated in another protocol (UDP and UDP/DTLS or TCP/DTLS respectively). This is the same as RoQ - this is RTP being encapsulated in QUIC transport, therefore I think this is the right way to do it.\r\n\r\nTaking DCCP as one example, the port of the encapsulating UDP packet goes in the media (\"m=\") line, and then the DCCP port number does in a [`dccp-port` attribute](https://datatracker.ietf.org/doc/html/rfc6773#section-5.2). This spec also specifies what to do with a media description that contains the `rtcp` or `rtcp-mux` attributes.\r\n\r\nTherefore, for RoQ the UDP port for the QUIC transport connection goes into the media (\"m=\") line, and then we have to describe the Flow Identifier in an attribute, which I've called `roq-flow-id`. The RoQ-SDP spec should probably mention the specifics about mapping RoQ Flow Identifiers onto the `rtcp` attribute as well. The concern here should be that some parsers will assume that the `rtcp` attribute will contain a value only between 1 and 65535 (i.e. a 16-bit unsigned integer), whereas an RTP Flow Identifier is defined as a 62-bit unsigned (variable length QUIC) integer. The ABNF for the `port` attribute is `1*(DIGIT)`, so in theory it should be fine as the limit is only given in a comment, but an implementer-beware message should suffice here I think.\r\n\r\nHere's an example SDP offer from my implementation:\r\n\r\n```o=samuelh 34178951687 34178951687 IN IP4 10.44.0.77:43243\r\ns= \r\ni=SIP-over-QUIC Offer/Answer example\r\nc=IN IP4 10.44.0.77:43243\r\nt=0 0\r\nm=video 43243 QUIC/RTP/AVPF 96\r\na=roq-flow-id:0\r\na=rtcp:1\r\na=rtpmap:96 H264/90000\r\na=fmtp:96 profile-level-id=640020;packetization-mode=1;sprop-parameter-sets=Z0LAHtkAyD2wFqDAwNS\r\na=imageattr:96 send [x=1280,y=720,sar=1.0]\r\na=sendonly\r\nb=AS:5000\r\n```\r\n\r\nLet me know what you think. I can try and come up with a pull request with some text to go into the draft for this if you'd like.",
+      "createdAt": "2024-06-05T10:08:40Z",
+      "updatedAt": "2024-06-05T10:09:10Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 5,
+      "id": "I_kwDOMBStD86LNSAO",
+      "title": "How to identify QUIC transport sessions",
+      "url": "https://github.com/SpencerDawkins/sdp-roq/issues/5",
+      "state": "OPEN",
+      "author": "samhurst",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The draft currently doesn't specify how to identify a QUIC transport session that will carry the RTP-over-QUIC traffic. I think we could adopt the COMEDIA mechanisms specified for TCP and adapt them to QUIC. [RFC4145](https://www.rfc-editor.org/rfc/rfc4145) specifies how to do it with regular TCP and section 8 describes how to apply it to protocols that are not TCP. Then there's [RFC8122](https://www.rfc-editor.org/rfc/rfc8122) which adds things about TLS (which I haven't read in detail yet so I don't know if this is helpful, but I'm linking it here anyway just in case).\r\n\r\nThe only concern I have is that existing COMEDIA options all use the 5-tuple to uniquely identify a transport connection. However, a QUIC connection is not bound to a single 5-tuple, as it can perform connection migration. In future, this would also preclude the description of multipath QUIC sessions.\r\n\r\nIn the case where a new connection is established, this should be fine - but the concern here is about reuse of existing connections. Given that QUIC allows multiplexing of traffic, there's definitely a use-case where you could negotiate SDP media descriptions using something like SIP-over-QUIC using bidirectional streams, and then re-use the same transport connection with the callee/caller to run the RTP over unidirectional streams.\r\n\r\nI don't have a good answer to the identification of extant QUIC transport associations at the moment, so this is more of an open question. We also can't use QUIC connection IDs as for one they can be generated and revoked at any time by the transport layer, and two I feel that putting connection IDs in an SDP media description is a security problem as it means an attacker could gain prior knowledge of some of the things which might be present in a QUIC transport packet, and use that to help attack the encryption context.",
+      "createdAt": "2024-06-05T10:27:53Z",
+      "updatedAt": "2024-06-05T10:27:53Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 6,
+      "id": "I_kwDOMBStD86LNdkv",
+      "title": "How to describe whether data will be sent over streams or datagrams",
+      "url": "https://github.com/SpencerDawkins/sdp-roq/issues/6",
+      "state": "OPEN",
+      "author": "samhurst",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently, there's no specified way for a a media description to describe how RTP and RTCP data is transmitted, either over QUIC streams or DATAGRAM frames.\r\n\r\nI seem to remember in the past that putting `stream` or `dgram` in the proto field of the media line (i.e. `QUIC/stream/RTP/AVP`), which I've been experimenting with but I don't think this is quite right.\r\n\r\nThe latest RoQ draft specifies that [RTP can be sent on streams, DATAGRAM frames or a mixture of both](https://www.ietf.org/archive/id/draft-ietf-avtcore-rtp-over-quic-10.html#name-rtp-with-quic-streams-quic-). With my implementer hat on, here's some use-cases that I can think of where I might want to do different things:\r\n\r\n- Send one RTP session over streams, and another over DATAGRAM frames (i.e. a more important stream that I'm less tolerant of loss on against something I don't mind loss on)\r\n- Within a single RTP session, sending all RTP over streams and all RTCP over DATAGRAM frames.\r\n- Within a single RTP session that in this case is sending a video stream, sending all RTP packets containing I-frames over streams for reliability, and then B- and P-frames over DATAGRAM frames.\r\n\r\nI'm sure there are potentially other use-cases, but these are the ones that I can think of so far.\r\n\r\nNow, looking at QUIC transport itself, DATAGRAM frames are an extension that may not be available. So a soft-touch approach to this might be that the SDP media description simply states that the QUIC connection should be negotiated with support for DATAGRAM frames, and then leave the actual usage up to the implementations.\r\n\r\nOtherwise, might there be a reason why we want to describe how streams/datagrams will be used in a given media session? Maybe an implementation doesn't want to have too much DATAGRAM processing to do, so it could reject an offer that includes lots of DATAGRAM usage. I don't have a good answer to this one either, so I'll leave this as an open question too.",
+      "createdAt": "2024-06-05T10:48:09Z",
+      "updatedAt": "2024-06-05T10:48:09Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 7,
+      "id": "I_kwDOMBStD86LNkRO",
+      "title": "Controlling stream representation",
+      "url": "https://github.com/SpencerDawkins/sdp-roq/issues/7",
+      "state": "OPEN",
+      "author": "samhurst",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "This is related to my questions in #6, but this is something I've been experimenting on so wanted to surface it somewhere, and as this may result in some suggestions that go back to the RoQ draft itself I thought I won't detract from discussion there with this.\r\n\r\nIn my implementation, I've made it so the way that RTP frames are payloaded into QUIC streams can be controlled in the following ways:\r\n\r\n- All RTP frames on a single stream (until the QUIC stream runs out of sending credit)\r\n- All RTP frames for one or more GOPs on a single stream\r\n- All RTP frames for one or more frames on a single stream\r\n\r\nI control this with a \"stream boundary\" and \"stream packing\" parameter. The \"stream boundary\" parameter can be set to single, gop or frame, and then the \"stream packing\" parameter sets the number of GOPs or frames to put in each stream.\r\n\r\nThe reason you might want to do this is to be able to send `STOP_SENDING` or reset a stream you're no longer interested in, to get the sender to catch up to the latest frames.\r\n\r\nThe RoQ draft doesn't say anything on this subject, merely leaves it up to implementations to decide. I wonder whether this is something that we might want to specify more concretely, and where would be the best place to put it? Is there a use-case for a caller requesting a stream (i.e. `a=recvonly`) and then specifying how it wants that stream to be delivered? I've added `roq-stream-boundary` and `roq-stream-packing` attributes to my WIP implementation and have been experimenting with it a little bit with the intention of seeing whether it can positively affect latency on received streams.",
+      "createdAt": "2024-06-05T11:01:20Z",
+      "updatedAt": "2024-06-05T11:01:20Z",
       "closedAt": null,
       "comments": []
     }
