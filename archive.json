@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-18T00:54:29.074631+00:00",
+  "timestamp": "2024-07-21T00:59:10.125873+00:00",
   "repo": "SpencerDawkins/sdp-roq",
   "labels": [
     {
@@ -159,6 +159,24 @@
       "body": "This is related to my questions in #6, but this is something I've been experimenting on so wanted to surface it somewhere, and as this may result in some suggestions that go back to the RoQ draft itself I thought I won't detract from discussion there with this.\r\n\r\nIn my implementation, I've made it so the way that RTP frames are payloaded into QUIC streams can be controlled in the following ways:\r\n\r\n- All RTP frames on a single stream (until the QUIC stream runs out of sending credit)\r\n- All RTP frames for one or more GOPs on a single stream\r\n- All RTP frames for one or more frames on a single stream\r\n\r\nI control this with a \"stream boundary\" and \"stream packing\" parameter. The \"stream boundary\" parameter can be set to single, gop or frame, and then the \"stream packing\" parameter sets the number of GOPs or frames to put in each stream.\r\n\r\nThe reason you might want to do this is to be able to send `STOP_SENDING` or reset a stream you're no longer interested in, to get the sender to catch up to the latest frames.\r\n\r\nThe RoQ draft doesn't say anything on this subject, merely leaves it up to implementations to decide. I wonder whether this is something that we might want to specify more concretely, and where would be the best place to put it? Is there a use-case for a caller requesting a stream (i.e. `a=recvonly`) and then specifying how it wants that stream to be delivered? I've added `roq-stream-boundary` and `roq-stream-packing` attributes to my WIP implementation and have been experimenting with it a little bit with the intention of seeing whether it can positively affect latency on received streams.",
       "createdAt": "2024-06-05T11:01:20Z",
       "updatedAt": "2024-06-05T11:01:20Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 8,
+      "id": "I_kwDOMBStD86QRr0F",
+      "title": "Align RoQ and SDP-RoQ drafts (in SDP-RoQ)",
+      "url": "https://github.com/SpencerDawkins/sdp-roq/issues/8",
+      "state": "OPEN",
+      "author": "SpencerDawkins",
+      "authorAssociation": "OWNER",
+      "assignees": [
+        "SpencerDawkins"
+      ],
+      "labels": [],
+      "body": "This issue is the counterpart to Issue [224](https://github.com/mengelbart/rtp-over-quic-draft/issues/224) in the[rtp-over-quic-draft](https://github.com/mengelbart/rtp-over-quic-draft/) Github repo. \r\n\r\nFor background, see [the June 2024 AVTCORE virtual interim meeting notes](https://notes.ietf.org/notes-ietf-interim-2024-avtcore-02-avtcore?edit) for both [RoQ](https://youtu.be/9K6lLFngMYM?si=sskgPTM4fLVC_Pdn&t=1712) and [SDP-RoQ](https://youtu.be/9K6lLFngMYM?si=TI0iJWv7RRcvvarq&t=3246) sessions. \r\n\r\nThis issue is intended to capture what is not part of the current RoQ specification, and is not specifically tied to SDP for RoQ. \r\n\r\nAs a starting point, this would include options for opening, and for reusing, a QUIC connection for RoQ.\r\n\r\nThese options include (at least) \r\n\r\n- manual configuration of an endpoint, \r\n- reuse of a QUIC connection that was used for SDP, \r\n- use of the \"roq\" APLN defined in the RoQ specification, and \r\n- using SDP to open and reuse a QUIC connection, similarly to the way RTP over TCP uses SDP to open and reuse TCP connections. \r\n\r\nThis issue will likely grow before it shrinks!",
+      "createdAt": "2024-07-20T04:31:45Z",
+      "updatedAt": "2024-07-20T04:31:46Z",
       "closedAt": null,
       "comments": []
     }
