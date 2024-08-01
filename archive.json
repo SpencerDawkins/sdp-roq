@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-30T00:55:34.685800+00:00",
+  "timestamp": "2024-08-01T01:00:15.845341+00:00",
   "repo": "SpencerDawkins/sdp-roq",
   "labels": [
     {
@@ -110,7 +110,7 @@
       "labels": [],
       "body": "I've been separately experimenting with describing RoQ sessions in an implementation of my [old SIP-over-QUIC draft](https://datatracker.ietf.org/doc/draft-hurst-sip-quic/), which uses SDP offer/answer underneath.\r\n\r\nI've been prodding at this for a while and gone through a few iterations, and what I've landed on is adding a new attribute that describes the RoQ Flow Identifier.\r\n\r\nLooking at the prior-art in this area, I've found [DCCP-UDP](https://datatracker.ietf.org/doc/html/rfc6773) and [SCTP-DTLS](https://datatracker.ietf.org/doc/html/rfc8841). In both of these cases, the transport protocol carrying the RTP (DCCP and SCTP) are encapsulated in another protocol (UDP and UDP/DTLS or TCP/DTLS respectively). This is the same as RoQ - this is RTP being encapsulated in QUIC transport, therefore I think this is the right way to do it.\r\n\r\nTaking DCCP as one example, the port of the encapsulating UDP packet goes in the media (\"m=\") line, and then the DCCP port number does in a [`dccp-port` attribute](https://datatracker.ietf.org/doc/html/rfc6773#section-5.2). This spec also specifies what to do with a media description that contains the `rtcp` or `rtcp-mux` attributes.\r\n\r\nTherefore, for RoQ the UDP port for the QUIC transport connection goes into the media (\"m=\") line, and then we have to describe the Flow Identifier in an attribute, which I've called `roq-flow-id`. The RoQ-SDP spec should probably mention the specifics about mapping RoQ Flow Identifiers onto the `rtcp` attribute as well. The concern here should be that some parsers will assume that the `rtcp` attribute will contain a value only between 1 and 65535 (i.e. a 16-bit unsigned integer), whereas an RTP Flow Identifier is defined as a 62-bit unsigned (variable length QUIC) integer. The ABNF for the `port` attribute is `1*(DIGIT)`, so in theory it should be fine as the limit is only given in a comment, but an implementer-beware message should suffice here I think.\r\n\r\nHere's an example SDP offer from my implementation:\r\n\r\n```o=samuelh 34178951687 34178951687 IN IP4 10.44.0.77:43243\r\ns= \r\ni=SIP-over-QUIC Offer/Answer example\r\nc=IN IP4 10.44.0.77:43243\r\nt=0 0\r\nm=video 43243 QUIC/RTP/AVPF 96\r\na=roq-flow-id:0\r\na=rtcp:1\r\na=rtpmap:96 H264/90000\r\na=fmtp:96 profile-level-id=640020;packetization-mode=1;sprop-parameter-sets=Z0LAHtkAyD2wFqDAwNS\r\na=imageattr:96 send [x=1280,y=720,sar=1.0]\r\na=sendonly\r\nb=AS:5000\r\n```\r\n\r\nLet me know what you think. I can try and come up with a pull request with some text to go into the draft for this if you'd like.",
       "createdAt": "2024-06-05T10:08:40Z",
-      "updatedAt": "2024-07-27T00:38:55Z",
+      "updatedAt": "2024-07-30T11:17:25Z",
       "closedAt": null,
       "comments": [
         {
@@ -119,6 +119,13 @@
           "body": "Hi, @samhurst, what you're proposing here makes perfect sense to me. If you have a moment to propose text, that would be great!\r\n\r\nI do have questions (and will probably have more after I get home from IETF 120), but one obvious question is that Bernard has asked interesting questions in the [RoQ repository](https://github.com/mengelbart/rtp-over-quic-draft/issues/226) about whether we should be (strongly) recommending datagrams for RTCP in RoQ implementations. Mathis has a proposal on the AVTCORE mailing list about that [here](https://mailarchive.ietf.org/arch/msg/avt/x8RW0j6m7NiuSXXtSgWgbFhZNsw/), with pointers to the PR, diffs, etc. \r\n\r\nI don't know whether that possibility would affect any text you provide, but I wanted to make sure you knew what I know. ",
           "createdAt": "2024-07-27T00:38:54Z",
           "updatedAt": "2024-07-27T00:38:54Z"
+        },
+        {
+          "author": "rjb1000",
+          "authorAssociation": "NONE",
+          "body": "> I do have questions (and will probably have more after I get home from IETF 120), but one obvious question is that Bernard has asked interesting questions in the [RoQ repository](https://github.com/mengelbart/rtp-over-quic-draft/issues/226) about whether we should be (strongly) recommending datagrams for RTCP in RoQ implementations. Mathis has a proposal on the AVTCORE mailing list about that [here](https://mailarchive.ietf.org/arch/msg/avt/x8RW0j6m7NiuSXXtSgWgbFhZNsw/), with pointers to the PR, diffs, etc.\r\n\r\nLooking at the analysis on [RoQ issue #226](https://github.com/mengelbart/rtp-over-quic-draft/issues/226), the existence of RFC 4571 makes it difficult to be prescriptive about using QUIC datagrams to convey RTCP packets. Conveying RTCP over a reliable connection is just a fact on the ground that needs to be accommodated in the RoQ specification. I think that @mengelbart has found a suitably neutral path in his proposed change to the RoQ I-D. The recommendation there not to mix and match streams and datagrams for RTP and RTCP traffic in the same QUIC connection seems sensibly pragmatic too.\r\n\r\nPresumably it is useful to be able to discriminate between datagram carriage and reliable stream carriage of RoQ in the SDP offer/answer. The vocabulary of Media Description *proto* identifiers could enforce the recommendation against mixing and matching for RTP and RTCP.\r\n\r\nOne additional question in my mind: I wonder if the combination in the same QUIC connection of RTP and RTCP conveyed in datagrams plus SIP carried over reliable streams would disrupt RTCP's measurement of round-trip time? Looking at @mengelbart's proposal, I presume not since it effectively redefines RTT as a measure of the application layer outcome for the RTCP packets, independent of how they are conveyed in the QUIC connection, instead of being a network layer metric.",
+          "createdAt": "2024-07-30T11:17:24Z",
+          "updatedAt": "2024-07-30T11:17:24Z"
         }
       ]
     },
