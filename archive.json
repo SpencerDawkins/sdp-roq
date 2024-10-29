@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-27T01:07:39.655086+00:00",
+  "timestamp": "2024-10-29T01:04:16.299473+00:00",
   "repo": "SpencerDawkins/sdp-roq",
   "labels": [
     {
@@ -173,9 +173,24 @@
       "labels": [],
       "body": "This is related to my questions in #6, but this is something I've been experimenting on so wanted to surface it somewhere, and as this may result in some suggestions that go back to the RoQ draft itself I thought I won't detract from discussion there with this.\r\n\r\nIn my implementation, I've made it so the way that RTP frames are payloaded into QUIC streams can be controlled in the following ways:\r\n\r\n- All RTP frames on a single stream (until the QUIC stream runs out of sending credit)\r\n- All RTP frames for one or more GOPs on a single stream\r\n- All RTP frames for one or more frames on a single stream\r\n\r\nI control this with a \"stream boundary\" and \"stream packing\" parameter. The \"stream boundary\" parameter can be set to single, gop or frame, and then the \"stream packing\" parameter sets the number of GOPs or frames to put in each stream.\r\n\r\nThe reason you might want to do this is to be able to send `STOP_SENDING` or reset a stream you're no longer interested in, to get the sender to catch up to the latest frames.\r\n\r\nThe RoQ draft doesn't say anything on this subject, merely leaves it up to implementations to decide. I wonder whether this is something that we might want to specify more concretely, and where would be the best place to put it? Is there a use-case for a caller requesting a stream (i.e. `a=recvonly`) and then specifying how it wants that stream to be delivered? I've added `roq-stream-boundary` and `roq-stream-packing` attributes to my WIP implementation and have been experimenting with it a little bit with the intention of seeing whether it can positively affect latency on received streams.",
       "createdAt": "2024-06-05T11:01:20Z",
-      "updatedAt": "2024-06-05T11:01:20Z",
+      "updatedAt": "2024-10-28T16:07:38Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "SpencerDawkins",
+          "authorAssociation": "OWNER",
+          "body": "@samhurst - I THINK [Section 5.2.2 of the current RoQ specification](https://mengelbart.github.io/rtp-over-quic-draft/draft-ietf-avtcore-rtp-over-quic.html#name-media-frame-cancellation) addresses the way a receiver can get the sender to catch up to the current media frames. Does it look that way to you? ",
+          "createdAt": "2024-10-28T13:42:22Z",
+          "updatedAt": "2024-10-28T13:42:22Z"
+        },
+        {
+          "author": "samhurst",
+          "authorAssociation": "NONE",
+          "body": "Hi @SpencerDawkins ,\r\n\r\nSection 5.2.2 certainly describes the mechanism for the receiver to stop the reception of frames on individual streams, and it's up to the sender to decide what that means, as the wording of 5.2.2 is not prescriptive over what the intended response by the sender should be in this instance. The only prescriptive part of it is that any media frame already sent on the QUIC stream that the receiver has stopped reading can't be sent again.\r\n\r\nHowever, my question is more to do with controlling how the sender chooses to use streams to present RTP frames to the receiver, not in response to the receiver requesting that a given stream stops sending, although there is some overlap. Section 5.2 of the RoQ draft describes that RoQ senders may choose to do this to avoid head-of-line blocking. What I'm seeking to achieve here is how do we describe this behaviour in SDP?",
+          "createdAt": "2024-10-28T16:07:37Z",
+          "updatedAt": "2024-10-28T16:07:37Z"
+        }
+      ]
     },
     {
       "number": 8,
