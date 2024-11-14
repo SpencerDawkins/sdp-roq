@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-12T01:01:11.678129+00:00",
+  "timestamp": "2024-11-14T01:02:26.198794+00:00",
   "repo": "SpencerDawkins/sdp-roq",
   "labels": [
     {
@@ -155,7 +155,7 @@
       "labels": [],
       "body": "The draft currently doesn't specify how to identify a QUIC transport session that will carry the RTP-over-QUIC traffic. I think we could adopt the COMEDIA mechanisms specified for TCP and adapt them to QUIC. [RFC4145](https://www.rfc-editor.org/rfc/rfc4145) specifies how to do it with regular TCP and section 8 describes how to apply it to protocols that are not TCP. Then there's [RFC8122](https://www.rfc-editor.org/rfc/rfc8122) which adds things about TLS (which I haven't read in detail yet so I don't know if this is helpful, but I'm linking it here anyway just in case).\r\n\r\nThe only concern I have is that existing COMEDIA options all use the 5-tuple to uniquely identify a transport connection. However, a QUIC connection is not bound to a single 5-tuple, as it can perform connection migration. In future, this would also preclude the description of multipath QUIC sessions.\r\n\r\nIn the case where a new connection is established, this should be fine - but the concern here is about reuse of existing connections. Given that QUIC allows multiplexing of traffic, there's definitely a use-case where you could negotiate SDP media descriptions using something like SIP-over-QUIC using bidirectional streams, and then re-use the same transport connection with the callee/caller to run the RTP over unidirectional streams.\r\n\r\nI don't have a good answer to the identification of extant QUIC transport associations at the moment, so this is more of an open question. We also can't use QUIC connection IDs as for one they can be generated and revoked at any time by the transport layer, and two I feel that putting connection IDs in an SDP media description is a security problem as it means an attacker could gain prior knowledge of some of the things which might be present in a QUIC transport packet, and use that to help attack the encryption context.",
       "createdAt": "2024-06-05T10:27:53Z",
-      "updatedAt": "2024-11-11T19:27:04Z",
+      "updatedAt": "2024-11-13T12:14:57Z",
       "closedAt": null,
       "comments": [
         {
@@ -171,6 +171,13 @@
           "body": "I don't think using flow IDs to identify QUIC connections is a good solution for this problem. It requires reading the payload of at least one RTP/RTCP packet but doesn't allow the endpoint to identify the QUIC connection based on the handshake packets.\r\n\r\nThis is a hard problem, and I am not sure how we can solve it. In addition to connections changing their 5-tuple, I think we could also have multiple connections with the same 5-tuple, which doesn't make it easier...\r\n\r\nHowever, I wouldn't rule out connection IDs completely. Maybe we can't put explicit IDs in SDP directly, but maybe there's a way along the lines of what the [QUIC LB draft](https://datatracker.ietf.org/doc/html/draft-ietf-quic-load-balancers) is doing by encoding some information in the connection ID?",
           "createdAt": "2024-11-11T19:27:03Z",
           "updatedAt": "2024-11-11T19:27:03Z"
+        },
+        {
+          "author": "samhurst",
+          "authorAssociation": "NONE",
+          "body": "It is a very hard problem indeed, as we're trying to do something that QUIC was expressly designed to avoid. I still think that adopting the COMEDIA approach to specify new/existing connections is required, and it's always an option to be more prescriptive than the QUIC spec allows - for example, it could be written that we can't reuse QUIC connections that are multiplexed on the same 5-tuple. The SDP answerer would be expected to change the connection attribute to \"new\" if this condition cannot be met, as specified in [section 5.1 of RFC 4145](https://www.rfc-editor.org/rfc/rfc4145#section-5.1).\r\n\r\nI think it's also worth thinking about whether we want to consider the capabilities of extant QUIC connections to slim down the pool of potential reuse candidates. For example, if you've got three QUIC connections to choose from, you could look at the negotiated ALPNs for those connections and decide whether they would be compatible. For example, any `h3` ones wouldn't be compatible, but any with `roq` would be. Equally, any other ALPNs that include scope for carrying RoQ frames (such as SIP-over-QUIC, which may be the same connection exchanging these SDP documents) could be considered.\r\n\r\nI'm not sure the QUIC-LB approach would really work here, as it will make a lot of assumptions on how QUIC stacks work. The connection would need to support it right from the beginning, and if the connection is owned by something like a web browser I don't know what level of imposition we can realistically make on how they generate connection IDs. And indeed, it implies a much tighter bindings to the internals of a QUIC connection than realistically RoQ or SDP needs to have.\r\n\r\nI have also tried looking for other attributes or features that already exist in QUIC that we could use, and I'm coming up a bit short. We could reuse the token which is exchanged by `NEW_TOKEN` frames, but this is used to validate connection paths so this would be information leakage that an attacker could exploit to make the QUIC stack do something odd, same as disclosing connection IDs. The only other option I've come up with is to invent a new transport parameter that just stores a random value which is otherwise never shared between endpoints as a way of identifying QUIC connections out-of-band, but again this requires more fiddling deeper in the QUIC stack.",
+          "createdAt": "2024-11-13T12:14:55Z",
+          "updatedAt": "2024-11-13T12:14:55Z"
         }
       ]
     },
@@ -186,7 +193,7 @@
       "labels": [],
       "body": "Currently, there's no specified way for a a media description to describe how RTP and RTCP data is transmitted, either over QUIC streams or DATAGRAM frames.\r\n\r\nI seem to remember in the past that putting `stream` or `dgram` in the proto field of the media line (i.e. `QUIC/stream/RTP/AVP`), which I've been experimenting with but I don't think this is quite right.\r\n\r\nThe latest RoQ draft specifies that [RTP can be sent on streams, DATAGRAM frames or a mixture of both](https://www.ietf.org/archive/id/draft-ietf-avtcore-rtp-over-quic-10.html#name-rtp-with-quic-streams-quic-). With my implementer hat on, here's some use-cases that I can think of where I might want to do different things:\r\n\r\n- Send one RTP session over streams, and another over DATAGRAM frames (i.e. a more important stream that I'm less tolerant of loss on against something I don't mind loss on)\r\n- Within a single RTP session, sending all RTP over streams and all RTCP over DATAGRAM frames.\r\n- Within a single RTP session that in this case is sending a video stream, sending all RTP packets containing I-frames over streams for reliability, and then B- and P-frames over DATAGRAM frames.\r\n\r\nI'm sure there are potentially other use-cases, but these are the ones that I can think of so far.\r\n\r\nNow, looking at QUIC transport itself, DATAGRAM frames are an extension that may not be available. So a soft-touch approach to this might be that the SDP media description simply states that the QUIC connection should be negotiated with support for DATAGRAM frames, and then leave the actual usage up to the implementations.\r\n\r\nOtherwise, might there be a reason why we want to describe how streams/datagrams will be used in a given media session? Maybe an implementation doesn't want to have too much DATAGRAM processing to do, so it could reject an offer that includes lots of DATAGRAM usage. I don't have a good answer to this one either, so I'll leave this as an open question too.",
       "createdAt": "2024-06-05T10:48:09Z",
-      "updatedAt": "2024-11-11T18:57:11Z",
+      "updatedAt": "2024-11-13T12:28:00Z",
       "closedAt": null,
       "comments": [
         {
@@ -223,6 +230,13 @@
           "body": "I wonder if we need to signal this in SDP at all. As @samhurst mentioned in the first comment, there are use cases for mixing streams and datagrams. RoQ has an error code for cases where external signaling does not agree with the parameters negotiated during QUIC connection establishment, but it would be nice if we could completely avoid that error condition. Datagrams are declared unilaterally, so if an application is ready to accept RTP over QUIC datagrams, it has to announce support for datagrams. If it does not want to receive datagrams, it shouldn't declare support for it. Similarly, if an application does not want to receive RTP in QUIC streams, it can use stream flow control to prohibit the peer from opening new streams.\r\n\r\nI am not an SDP expert, but if there is a good reason to include a signal in SDP, using `a=quic-datagrams` looks cleaner to me than including it in multiple `m` lines. One could also add different combinations if that would be useful, e.g., to allow mixing.",
           "createdAt": "2024-11-11T18:57:10Z",
           "updatedAt": "2024-11-11T18:57:10Z"
+        },
+        {
+          "author": "samhurst",
+          "authorAssociation": "NONE",
+          "body": "I don't quite know how RoQ \"announces\" support for datagrams. Is it not more that if support for sending RoQ datagrams is implied if the transport has exchanged `max_datagram_frame_size` transport parameters with a non-zero size?\r\n\r\nIt's also not really unilateral, as each endpoint in a QUIC connection can specify different values for the `max_datagram_frame_size` transport parameter, leading to only one endpoint being able to transmit datagrams. I think it does need to be negotiated in SDP, because the transport parameter says what the given endpoint is willing to receive. So in the case where the endpoint that creates the SDP wants to be able to use datagrams to send media, it needs to tell the remote endpoint to set the `max_datagram_frame_size` transport parameter to an appropriate value.\r\n\r\nI do agree that the `a=quic-datagrams` attribute is cleaner, and when combined with the direction attributes would give a set of rules for an endpoint when opening a new QUIC connection for that media session.",
+          "createdAt": "2024-11-13T12:27:58Z",
+          "updatedAt": "2024-11-13T12:27:58Z"
         }
       ]
     },
