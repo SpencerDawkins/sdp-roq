@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-24T01:11:16.618622+00:00",
+  "timestamp": "2024-11-26T01:06:39.878830+00:00",
   "repo": "SpencerDawkins/sdp-roq",
   "labels": [
     {
@@ -110,7 +110,7 @@
       "labels": [],
       "body": "I've been separately experimenting with describing RoQ sessions in an implementation of my [old SIP-over-QUIC draft](https://datatracker.ietf.org/doc/draft-hurst-sip-quic/), which uses SDP offer/answer underneath.\r\n\r\nI've been prodding at this for a while and gone through a few iterations, and what I've landed on is adding a new attribute that describes the RoQ Flow Identifier.\r\n\r\nLooking at the prior-art in this area, I've found [DCCP-UDP](https://datatracker.ietf.org/doc/html/rfc6773) and [SCTP-DTLS](https://datatracker.ietf.org/doc/html/rfc8841). In both of these cases, the transport protocol carrying the RTP (DCCP and SCTP) are encapsulated in another protocol (UDP and UDP/DTLS or TCP/DTLS respectively). This is the same as RoQ - this is RTP being encapsulated in QUIC transport, therefore I think this is the right way to do it.\r\n\r\nTaking DCCP as one example, the port of the encapsulating UDP packet goes in the media (\"m=\") line, and then the DCCP port number does in a [`dccp-port` attribute](https://datatracker.ietf.org/doc/html/rfc6773#section-5.2). This spec also specifies what to do with a media description that contains the `rtcp` or `rtcp-mux` attributes.\r\n\r\nTherefore, for RoQ the UDP port for the QUIC transport connection goes into the media (\"m=\") line, and then we have to describe the Flow Identifier in an attribute, which I've called `roq-flow-id`. The RoQ-SDP spec should probably mention the specifics about mapping RoQ Flow Identifiers onto the `rtcp` attribute as well. The concern here should be that some parsers will assume that the `rtcp` attribute will contain a value only between 1 and 65535 (i.e. a 16-bit unsigned integer), whereas an RTP Flow Identifier is defined as a 62-bit unsigned (variable length QUIC) integer. The ABNF for the `port` attribute is `1*(DIGIT)`, so in theory it should be fine as the limit is only given in a comment, but an implementer-beware message should suffice here I think.\r\n\r\nHere's an example SDP offer from my implementation:\r\n\r\n```o=samuelh 34178951687 34178951687 IN IP4 10.44.0.77:43243\r\ns= \r\ni=SIP-over-QUIC Offer/Answer example\r\nc=IN IP4 10.44.0.77:43243\r\nt=0 0\r\nm=video 43243 QUIC/RTP/AVPF 96\r\na=roq-flow-id:0\r\na=rtcp:1\r\na=rtpmap:96 H264/90000\r\na=fmtp:96 profile-level-id=640020;packetization-mode=1;sprop-parameter-sets=Z0LAHtkAyD2wFqDAwNS\r\na=imageattr:96 send [x=1280,y=720,sar=1.0]\r\na=sendonly\r\nb=AS:5000\r\n```\r\n\r\nLet me know what you think. I can try and come up with a pull request with some text to go into the draft for this if you'd like.",
       "createdAt": "2024-06-05T10:08:40Z",
-      "updatedAt": "2024-11-19T15:47:06Z",
+      "updatedAt": "2024-11-25T13:29:52Z",
       "closedAt": null,
       "comments": [
         {
@@ -154,6 +154,13 @@
           "body": "I think RTP already has mechanisms that we can utilise for this, and it's not something RoQ needs to be bothering with. RoQ is just the framing mechanism between a pair of peers, my understanding is that RoQ does not (and my strong opinion is that it **should not**) imply any equivalency between RTP media sessions and QUIC/RoQ sessions. I actually had an [explicit section describing this in my previous QRT draft](https://datatracker.ietf.org/doc/html/draft-hurst-quic-rtp-tunnelling-01#section-3).\r\n\r\nI think the closest I can think of for @SpencerDawkins 's **set** idea are the [Media Stream Identification](https://www.rfc-editor.org/rfc/rfc3388#section-3) and [Group](https://www.rfc-editor.org/rfc/rfc3388#section-4) attributes.\r\n\r\nAs a side note for @mengelbart - I just reviewed [rtp-over-quic-12](https://www.ietf.org/archive/id/draft-ietf-avtcore-rtp-over-quic-12.html) while tying this response and found a couple of references to a \"RoQ (media) session\" which might be worthwhile defining or removing - your choice.",
           "createdAt": "2024-11-19T15:47:05Z",
           "updatedAt": "2024-11-19T15:47:05Z"
+        },
+        {
+          "author": "SpencerDawkins",
+          "authorAssociation": "OWNER",
+          "body": "> I think RTP already has mechanisms that we can utilise for this, and it's not something RoQ needs to be bothering with. RoQ is just the framing mechanism between a pair of peers, my understanding is that RoQ does not (and my strong opinion is that it **should not**) imply any equivalency between RTP media sessions and QUIC/RoQ sessions. I actually had an [explicit section describing this in my previous QRT draft](https://datatracker.ietf.org/doc/html/draft-hurst-quic-rtp-tunnelling-01#section-3).\r\n> \r\n> I think the closest I can think of for @SpencerDawkins 's **set** idea are the [Media Stream Identification](https://www.rfc-editor.org/rfc/rfc3388#section-3) and [Group](https://www.rfc-editor.org/rfc/rfc3388#section-4) attributes.\r\n\r\n@samhurst - I was wondering about that myself - thank you for nudging me in that direction!\r\n\r\n> As a side note for @mengelbart - I just reviewed [rtp-over-quic-12](https://www.ietf.org/archive/id/draft-ietf-avtcore-rtp-over-quic-12.html) while tying this response and found a couple of references to a \"RoQ (media) session\" which might be worthwhile defining or removing - your choice.\r\n\r\nMy suggestion was to define it, especially if we can define it using existing RTP mechanisms. We seemed to fall into that term naturally. But I can talk with @mengelbart about that more. \r\n\r\n",
+          "createdAt": "2024-11-25T13:29:51Z",
+          "updatedAt": "2024-11-25T13:29:51Z"
         }
       ]
     },
