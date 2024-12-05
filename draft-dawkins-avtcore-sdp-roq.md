@@ -112,7 +112,7 @@ The following is an update to the ABNF for an 'm' line, as specified by {{!RFC88
    <fmt>:                   (unchanged from {{!RFC8866}})
 ~~~~~~
 
-## The QUIC/RTP/SAVP proto {#savp}
+### The QUIC/RTP/SAVP proto {#savp}
 
 The following is an update to the ABNF for an 'm' line, as specified by {{!RFC8866}}, that defines a new value for the QUIC/RTP/SAVP protocol.
 
@@ -128,7 +128,7 @@ The following is an update to the ABNF for an 'm' line, as specified by {{!RFC88
    <fmt>:                   (unchanged from {{!RFC8866}})
 ~~~~~~
 
-## The QUIC/RTP/AVPF proto {#avpf}
+### The QUIC/RTP/AVPF proto {#avpf}
 
 The following is an update to the ABNF for an 'm' line, as specified by {{!RFC8866}}, that defines a new value for the QUIC/RTP/AVPF protocol.
 
@@ -144,7 +144,7 @@ The following is an update to the ABNF for an 'm' line, as specified by {{!RFC88
    <fmt>:                   (unchanged from {{!RFC8866}})
 ~~~~~~
 
-## The QUIC/RTP/SAVPF proto {#savpf}
+### The QUIC/RTP/SAVPF proto {#savpf}
 
 The following is an update to the ABNF for an 'm' line, as specified by {{!RFC8866}}, that defines a new value for the QUIC/RTP/SAVPF protocol.
 
@@ -159,6 +159,41 @@ The following is an update to the ABNF for an 'm' line, as specified by {{!RFC88
    <port>:                  UDP port number
    <fmt>:                   (unchanged from {{!RFC8866}})
 ~~~~~~
+
+## RTP-over-QUIC Flow Identifiers {#rtp-quic-flow-id}
+
+Section 5.1 of {{!I-D.ietf-avtcore-rtp-over-quic}} introduces a multiplexing identifier for RTP flows carried over a QUIC connection called "Flow Identifiers". This section defines a new SDP media-level attribute, "roq-flow-id". The attribute can be associated with an SDP media description ("m=" line) with any of the QUIC proto values defined in {{quic}}. In that case, the "m=" line port value indicates the port of the underlying QUIC transport UDP port, and the "roq-flow-id" value indicates the RTP-over-QUIC Flow Identifier.
+
+No default value is defined for the SDP "roq-flow-id" attribute. Therefore, if the attribute is not present, the associated "m=" line MUST be considered invalid.
+
+The definition of the SDP "roq-flow-id" attribute is:
+
+Attribute name:  roq-flow-id
+
+Type of attribute:  media
+
+Mux category:  CAUTION
+
+> **Author's Note:** I have set the mux category (as discussed in Section 4 of {{?RFC8859}}) as CAUTION, as an RTP mixer which is multiplexing several incoming streams onto one connection should be careful to ensure that RTP-over-QUIC Flow Identifiers do not overlap, and may need to rewrite the Flow Identifiers in received streams when further multiplexing them.
+
+Subject to charset:  No
+
+Purpose:  Indicate the RTP-over-QUIC Flow Idenfitier associated with the SDP media description.
+
+Appropriate values:  62-bit Unsigned Integer
+
+Contact name:  Spencer Dawkins
+
+Contact e-mail:  spencerdawkins.ietf@gmail.com
+
+Reference:  {{!I-D.dawkins-avtcore-sdp-roq}}
+
+Syntax:
+~~~~~~
+roq-flow-id = 1*19(DIGIT) ; DIGIT defined in RFC 4566
+~~~~~~
+
+The RTP-over-QUIC flow identifier range is between 0 and 4611686018427387903 (2^62 - 1) (both included). Leading zeroes MUST NOT be used.
 
 ## A QUIC/RTP/AVPF Offer
 
@@ -179,6 +214,7 @@ A complete example of an SDP offer using QUIC/RTP/AVPF might look like:
 |m=video 51372 QUIC/RTP/AVPF 99 |QUIC transport|
 |a=setup:passive|will wait for QUIC handshake (setup attribute from {{!RFC4145}})|
 |a=connection:new|don't want to reuse an existing QUIC connection (connection attribute from {{!RFC4145}})|
+|a=roq-flow-id:2|RTP-over-QUIC Flow Identifier shall be 2 for streams described by this SDP media description|
 |c=IN IP6 2001:db8::2 |Same as {{!RFC8866}}|
 |a=rtpmap:99 h266/90000 |H.266 VVC codec {{?I-D.ietf-avtcore-rtp-vvc}}|
 
@@ -254,6 +290,12 @@ TODO Security
 # IANA Considerations
 
 TODO IANA Considerations from {{idents-atts}}.
+
+## New SDP Attributes
+
+### roq-flow-id
+
+This document defines a new SDP media-level attribute, "roq-flow-id". The details of the attribute are defined in {{rtp-quic-flow-id}}.
 
 --- back
 
