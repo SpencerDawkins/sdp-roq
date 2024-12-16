@@ -37,7 +37,7 @@ author:
     email: victor.pascual_avila@nokia.com
 
 normative:
-  SDP-parameters:
+  SDP-protos:
     target: https://www.iana.org/assignments/sdp-parameters/sdp-parameters.xhtml#sdp-parameters-2
     title: "SDP Parameters - Proto"
     date: September 2021
@@ -52,15 +52,15 @@ informative:
 
 This document describes several new SDP "proto" and "attribute-name" attribute values in the "Session Description Protocol (SDP) Parameters" IANA registry that can be used to describe QUIC transport for RTP and RTCP packets, and describes how SDP Offer/Answer can be used to set up an RTP connection using QUIC as a transport protocol.
 
-These proto values are necessary to allow the use of QUIC as an underlying transport protocol for applications such as SIP and WebRTC that commonly use SDP as a session signaling protocol to set up RTP connections.
+These new values are necessary to allow the use of QUIC as an underlying transport protocol for applications such as SIP and WebRTC that commonly use SDP as a session signaling protocol to set up RTP connections.
 
 --- middle
 
 # Introduction {#intro}
 
-This document describes several new SDP "proto" and "attribute-name" attribute values in the "Session Description Protocol (SDP) Parameters" IANA registry ({{SDP-parameters}} and {{SDP-attribute-name}}) that can be used to describe QUIC transport for RTP and RTCP packets, and describes how SDP Offer/Answer ({{!RFC3264}}) can be used to set up an RTP ({{!RFC3550}}) connection using QUIC ({{!RFC9000}} and related specifications), as defined in {{!I-D.ietf-avtcore-rtp-over-quic}}.
+This document describes several new SDP "proto" and "attribute-name" attribute values in the "Session Description Protocol (SDP) Parameters" IANA registry ({{SDP-protos}} and {{SDP-attribute-name}}) that can be used to describe QUIC transport for RTP and RTCP packets, and describes how SDP Offer/Answer ({{!RFC3264}}) can be used to set up an RTP ({{!RFC3550}}) connection using QUIC ({{!RFC9000}} and related specifications), as defined in {{!I-D.ietf-avtcore-rtp-over-quic}}.
 
-These proto values are necessary to allow the use of QUIC as an underlying transport protocol for applications such as SIP ({{?RFC3261}}) and WebRTC ({{?RFC8825}}) that commonly use SDP as a session signaling protocol to set up RTP connections.
+These new values are necessary to allow the use of QUIC as an underlying transport protocol for applications such as SIP ({{?RFC3261}}) and WebRTC ({{?RFC8825}}) that commonly use SDP as a session signaling protocol to set up RTP connections.
 
 ##Scope of this document {#scope}
 
@@ -78,9 +78,9 @@ This document is intended for publication as a standards-track RFC in the IETF s
 
 Because the use of SDP to describe RTP over QUIC transport relies heavily on terminology introduced in {{!I-D.ietf-avtcore-rtp-over-quic}}, the definitions in that document are prerequisite for understanding this document, and those terms are included here by reference.
 
-# Protocol identifiers {#idents-atts}
+# New SDP Protocol identifiers {#idents-atts}
 
-This document reuses the following AVP profiles, in order to allow existing SIP and RTCWEB RTP applications to migrate more easily to RTP over QUIC:
+This document reuses the following AVP profiles from {{SDP-protos}}, in order to allow existing SIP and RTCWEB RTP applications to migrate more easily to RTP over QUIC:
 
  * RTP/AVP ("RTP Profile for Audio and Video Conferences with Minimal Control"), as defined in {{!RFC3551}}.
  * RTP/AVPF ("Extended RTP Profile for Real-time Transport Control Protocol (RTCP)-Based Feedback (RTP/AVPF)"), as defined in {{!RFC4585}}.
@@ -108,6 +108,7 @@ The following is an update to the ABNF for an 'm' line, as specified by {{!RFC88
    <port>:                  UDP port number
    <fmt>:                   (unchanged from {{!RFC8866}})
 ~~~~~~
+
 ## RoQ RTP Protos {#rtp-protos}
 
 As much as possible, attributes used in this section are reused from other specifications, with references to the original definitions.
@@ -175,6 +176,8 @@ The following is an update to the ABNF for an 'm' line, as specified by {{!RFC88
    <port>:                  UDP port number
    <fmt>:                   (unchanged from {{!RFC8866}})
 ~~~~~~
+
+# New SDP Attribute-Names
 
 ## RoQ QUIC-DATAGRAMs Attribute {#quic-datagrams}
 
@@ -248,18 +251,15 @@ Syntax:
 
 The RoQ flow identifier range is between 0 and 4611686018427387903 (2^62 - 1) (both included). Leading zeroes MUST NOT be used.
 
-## Discussion
+# Interaction with Existing RTP extensions
+
+* {{!I-D.ietf-avtcore-rtp-over-quic}} defines how RTP and RTCP can be multiplexed onto a single QUIC connection. An application that will perform this multiplexing uses the "rtcp-mux" attribute defined in {{!RFC5761}} in its SDP signaling.
+
+# Work in Progress
 
 **NOTE:** This section is still under construction. The contents are likely to change significantly before settling down!
 
 "QUIC", "QUIC/RTP/AVP", "QUIC/RTP/AVPF", "QUIC/RTP/SAVP", and "QUIC/RTP/SAVPF" are defined in the document now.
-
-This document currently includes secure profiles for middlebox support of legacy RTP endpoints.
-The thinking is that if a RoQ endpoint is communicating with a non-RoQ RTP endpoint using an RTP middlebox, the RoQ endpoint might reasonably use an insecure AVP profile when sending to the middlebox, but that endpoint doesn't have any way to control whether the RTP middlebox uses a secure profile when exchanging RTP with a non-RoQ endpoint.
-
-RoQ allows the encapsulation of RTP in both QUIC streams and in QUIC DATAGRAMs. We will include "stream" and "dgram" variants of any profiles we define.
-
-We've talked (a LOT) about including variants that failover to TCP/UDP/QUIC transport if UDP is blocked, so that an endpoint can proceed after ICE candidate probing, but can we assume that applications that can do other encapsulations will offer protocol identifiers for those encapsulations, in addition to "QUIC/RTP/AVPF" and related protocol identifiers?
 
 ## Opening a QUIC connection for use with RoQ
 
@@ -267,11 +267,7 @@ This document assumes that an authenticated QUIC connection will be opened using
 
 The SDP "setup" attribute, defined for media over TCP in {{!RFC4145}}, will be reused to indicate which endpoint initiates a QUIC connection (whether the endpoint actively opens a QUIC connection, or accepts an incoming QUIC connection.
 
-**Editor's Note:** do the actpass and holdconn setup roles have meaning for RTP over QUIC?
-
 The SDP "connection" attribute, defined for TCP in [RFC4145], will be reused to indicate whether the endpoint will open a new QUIC connection, or reuse an existing QUIC connection.
-
-* {{!I-D.ietf-avtcore-rtp-over-quic}} defines how RTP and RTCP can be multiplexed onto a single QUIC connection. An application that will perform this multiplexing uses the "rtcp-mux" attribute defined in {{!RFC5761}} in its SDP signaling.
 
 * Check QUIC impacts on BUNDLE
 
@@ -289,10 +285,6 @@ Things to remember in this section
 
 * QUIC Ping frames and ICE consent freshness (RFC 7675)
 
-## Interaction with Other RTP extensions
-
-**Editor's Note:** this section is present as a reminder that we need to think about this topic as we develop the specification.
-
 ## Negotiating for specific QUIC feedback replacing AVP/AVPF feedback
 
  Things to remember in this section
@@ -303,15 +295,7 @@ Things to remember in this section
 
 * What we might say about RFC 8888 congestion control
 
-## Considerations for end-to-end payload protection
-
- Things to remember in this section
-
-* Technical solution - support SFRAME
-
-* Human solution - require conformant RoQ middleboxes to bridge between RoQ and secure profiles (no RoQ=>AVP, no RoQ=>AVPF)
-
-## A QUIC/RTP/AVPF Offer Example
+# A QUIC/RTP/AVPF Offer Example
 
 **Editor's Note:** I still need to clean this example up, after discussion on the rest of the document.
 
@@ -346,17 +330,24 @@ This example SDP offer might be included in a SIP Invite.
 
 # Security Considerations
 
-TODO Security
+The security considerations sections of the Normative References in this document are incorporated by reference.
+
+This document currently includes secure profiles for middlebox support of legacy RTP endpoints.
+The thinking is that if a RoQ endpoint is communicating with a non-RoQ RTP endpoint using an RTP middlebox, the RoQ endpoint might reasonably use an insecure AVP profile when sending to the middlebox, but that endpoint doesn't have any way to control whether the RTP middlebox uses a secure profile when exchanging RTP with a non-RoQ endpoint.
+
+* Technical solution - support SFRAME
+
+* Human solution - require conformant RoQ middleboxes to bridge between RoQ and secure profiles (no RoQ=>AVP, no RoQ=>AVPF)
 
 # IANA Considerations
 
-## New SDP Attributes
+This document defines new IANA values in the {{SDP-protos}} and {{SDP-attribute-name}} registries.
 
-### quic-datagrams {#IANA-quic-datagrams}
+## quic-datagrams {#IANA-quic-datagrams}
 
 This document defines a new SDP media-level attribute, "quic-datagrams". The details of the attribute are defined in {{quic-datagrams}}.
 
-### roq-flow-id
+## roq-flow-id
 
 This document defines a new SDP media-level attribute, "roq-flow-id". The details of the attribute are defined in {{rtp-quic-flow-id}}.
 
