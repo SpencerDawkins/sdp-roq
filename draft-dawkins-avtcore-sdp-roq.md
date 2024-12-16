@@ -259,32 +259,6 @@ The RoQ flow identifier range is between 0 and 4611686018427387903 (2^62 - 1) (b
 
 **NOTE:** This section is still under construction. The contents are likely to change significantly before settling down!
 
-"QUIC", "QUIC/RTP/AVP", "QUIC/RTP/AVPF", "QUIC/RTP/SAVP", and "QUIC/RTP/SAVPF" are defined in the document now.
-
-## Opening a QUIC connection for use with RoQ
-
-This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of {{!I-D.ietf-avtcore-rtp-over-quic}}.
-
-The SDP "setup" attribute, defined for media over TCP in {{!RFC4145}}, will be reused to indicate which endpoint initiates a QUIC connection (whether the endpoint actively opens a QUIC connection, or accepts an incoming QUIC connection.
-
-The SDP "connection" attribute, defined for TCP in [RFC4145], will be reused to indicate whether the endpoint will open a new QUIC connection, or reuse an existing QUIC connection.
-
-* Check QUIC impacts on BUNDLE
-
-* Interaction with UDP-Connect to open pinholes in corporate proxies?
-
-## Implications of using ICE with SDP from RFC 8842
-
-Things to remember in this section
-
-* SDP "fingerprint" attribute, defined in {{?RFC8122}}
-
-* SDP "tls-id" attribute, defined in {{?RFC8842}}
-
-* QUIC address validation and ICE candidate pairs
-
-* QUIC Ping frames and ICE consent freshness (RFC 7675)
-
 ## Negotiating for specific QUIC feedback replacing AVP/AVPF feedback
 
  Things to remember in this section
@@ -295,7 +269,7 @@ Things to remember in this section
 
 * What we might say about RFC 8888 congestion control
 
-# A QUIC/RTP/AVPF Offer Example
+## A QUIC/RTP/AVPF Offer Example
 
 **Editor's Note:** I still need to clean this example up, after discussion on the rest of the document.
 
@@ -326,7 +300,37 @@ This example is largely based on an example appearing in {{!RFC8866}}, Section 5
 
 Because QUIC uses connections for both streams and datagrams, we are reusing two session- and media-level SDP attributes from {{SDP-attribute-name}} that were defined in {{!RFC4145}} for use with TCP: setup and connection.
 
-This example SDP offer might be included in a SIP Invite.
+This SDP offer might be included in a SIP INVITE, for example.
+
+# Implementation Topics
+
+This document focuses on the normative requirements for RoQ endpoints that use SDP for signaling. 
+
+Beyond those normative requirements, there are topics that are worth considering as part of implementation work. These topics are not part of "SDP for RoQ", but might be usefully gathered into an appendix or a separate "SDP for RoQ Implementation Guide". 
+
+## Opening a QUIC connection for use with RoQ
+
+This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of {{!I-D.ietf-avtcore-rtp-over-quic}}.
+
+The SDP "setup" attribute, defined for media over TCP in {{!RFC4145}}, will be reused to indicate which endpoint initiates a QUIC connection (whether the endpoint actively opens a QUIC connection, or accepts an incoming QUIC connection.
+
+The SDP "connection" attribute, defined for TCP in [RFC4145], will be reused to indicate whether the endpoint will open a new QUIC connection, or reuse an existing QUIC connection.
+
+* Check QUIC impacts on BUNDLE
+
+* Interaction with UDP-Connect to open pinholes in corporate proxies?
+
+## Implications of using ICE with SDP from RFC 8842
+
+Things to remember in this section
+
+* SDP "fingerprint" attribute, defined in {{?RFC8122}}
+
+* SDP "tls-id" attribute, defined in {{?RFC8842}}
+
+* QUIC address validation and ICE candidate pairs
+
+* QUIC Ping frames and ICE consent freshness (RFC 7675)
 
 # Security Considerations
 
