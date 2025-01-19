@@ -177,7 +177,9 @@ The following is an update to the ABNF for an 'm' line, as specified by {{!RFC88
    <fmt>:                   (unchanged from {{!RFC8866}})
 ~~~~~~
 
-# New SDP Attribute-Names
+# New SDP Attribute-Names for RoQ {#new-attrs}
+
+This section describes new SDP attributes that are created for use with RoQ.
 
 ## RoQ QUIC-DATAGRAMs Attribute {#quic-datagrams}
 
@@ -251,9 +253,25 @@ Syntax:
 
 The RoQ flow identifier range is between 0 and 4611686018427387903 (2^62 - 1) (both included). Leading zeroes MUST NOT be used.
 
-# Interaction with Existing RTP extensions
+# Interaction with Existing SDP Attributes {#existing-attributes}
 
-* {{!I-D.ietf-avtcore-rtp-over-quic}} defines how RTP and RTCP can be multiplexed onto a single QUIC connection. An application that will perform this multiplexing uses the "rtcp-mux" attribute defined in {{!RFC5761}} in its SDP signaling.
+This section describes how existing SDP attribute extensions are reused to describe RoQ media flows.
+
+## SDP Attributes Applying to a QUIC Connection/RTP Session {#conn-level}
+
+This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of {{!I-D.ietf-avtcore-rtp-over-quic}}.
+
+The SDP "setup" attribute, defined for media over TCP in {{!RFC4145}}, is reused to indicate which endpoint initiates a QUIC connection (whether the endpoint actively opens a QUIC connection, or accepts an incoming QUIC connection. This attribute MUST be present in SDP offers and answers for RoQ.
+
+The SDP "connection" attribute, defined for TCP in {{!RFC4145}}, is reused to indicate whether the endpoint will open a new QUIC connection, or reuse an existing QUIC connection. This attribute MUST be present in SDP offers and answers for RoQ.
+
+Because QUIC itself uses the TLS handshake as described in {{!RFC9001}}, the parties to a RoQ session MUST also provide authentication certificates as part of the TLS handshake procedure, as described in {{Section 5 of !RFC8122}}. When self-signed certificates are used, certificate fingerprint is represented in SDP using the fingerprint SDP attribute, as illustrated in {{Section 3.4 of !RFC8122}}, in order to provide assurance that two endpoints with no prior relationship are not being subjected to a man-in-the-middle attack.
+
+{{!I-D.ietf-avtcore-rtp-over-quic}} defines how RTP and RTCP can be multiplexed onto a single QUIC connection. An application that will perform this multiplexing uses the "rtcp-mux" attribute defined in {{!RFC5761}} in its SDP signaling.
+
+## SDP Attributes Applying to an SDP Media Line {#media-line}
+
+
 
 # Work in Progress
 
@@ -310,23 +328,17 @@ Beyond those normative requirements, there are topics that are worth considering
 
 ## Opening a QUIC connection for use with RoQ
 
-This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of {{!I-D.ietf-avtcore-rtp-over-quic}}.
-
-The SDP "setup" attribute, defined for media over TCP in {{!RFC4145}}, is reused to indicate which endpoint initiates a QUIC connection (whether the endpoint actively opens a QUIC connection, or accepts an incoming QUIC connection.
-
-The SDP "connection" attribute, defined for TCP in {{!RFC4145}}, is reused to indicate whether the endpoint will open a new QUIC connection, or reuse an existing QUIC connection.
-
 **Editor's Note:** The following considerations still need to be checked off in ongoing work.
 
 * Check QUIC impacts on BUNDLE
 
 * Interaction with UDP-Connect to open pinholes in corporate proxies?
 
-## Implications of using ICE with RoQ
+## Implications of using ICE with RoQ {#ice-impl}
 
 Because a peer address is validated during QUIC connection establishment as described in {{Section 8.1 of !RFC9000}}, when a RoQ endpoint uses ICE {{!RFC8445}} to communicate with another RoQ endpoint, an ICE agent will have already performed ICE candidate pair connectivity checking before a QUIC connection can be opened for use with RoQ.
 
-Because QUIC itself uses the TLS handshake as described in {{!RFC9001}}, the parties to a RoQ session MUST also provide authentication certificates as part of the the TLS handshake procedure, as described in {{Section 5 of !RFC8122}}. When self-signed certificates are used, certificate fingerprint is represented in SDP using the fingerprint SDP attribute, as illustrated in {{Section 3.4 of !RFC8122}}, in order to provide assurance that two endpoints with no prior relationship are not being subjected to a man-in-the-middle attack.
+
 
 **Editor's Note:** The following considerations still need to be checked off in ongoing work.
 
