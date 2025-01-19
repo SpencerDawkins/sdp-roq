@@ -5,8 +5,8 @@
 Audio/Video Transport Core Maintenance                        S. Dawkins
 Internet-Draft                                              Unaffiliated
 Intended status: Standards Track                              V. Pascual
-Expires: 16 July 2025                                              Nokia
-                                                         12 January 2025
+Expires: 23 July 2025                                              Nokia
+                                                         19 January 2025
 
 
                 SDP Offer/Answer for RTP over QUIC (RoQ)
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 July 2025.
+   This Internet-Draft will expire on 23 July 2025.
 
 Copyright Notice
 
@@ -86,10 +86,12 @@ Table of Contents
        3.2.2.  The QUIC/RTP/AVPF proto
        3.2.3.  The QUIC/RTP/SAVP proto
        3.2.4.  The QUIC/RTP/SAVPF proto
-   4.  New SDP Attribute-Names
+   4.  New SDP Attribute-Names for RoQ
      4.1.  RoQ QUIC-DATAGRAMs Attribute
      4.2.  RoQ Flow Identifiers
-   5.  Interaction with Existing RTP extensions
+   5.  Interaction with Existing SDP Attributes
+     5.1.  SDP Attributes Applying to a QUIC Connection/RTP Session
+     5.2.  SDP Attributes Applying to an SDP Media Line
    6.  Work in Progress
      6.1.  Negotiating for specific QUIC feedback replacing AVP/AVPF
            feedback
@@ -268,7 +270,10 @@ Table of Contents
       <port>:                  UDP port number
       <fmt>:                   (unchanged from {{RFC8866}})
 
-4.  New SDP Attribute-Names
+4.  New SDP Attribute-Names for RoQ
+
+   This section describes new SDP attributes that are created for use
+   with RoQ.
 
 4.1.  RoQ QUIC-DATAGRAMs Attribute
 
@@ -379,12 +384,43 @@ Table of Contents
    The RoQ flow identifier range is between 0 and 4611686018427387903
    (2^62 - 1) (both included).  Leading zeroes MUST NOT be used.
 
-5.  Interaction with Existing RTP extensions
+5.  Interaction with Existing SDP Attributes
 
-   *  [I-D.ietf-avtcore-rtp-over-quic] defines how RTP and RTCP can be
-      multiplexed onto a single QUIC connection.  An application that
-      will perform this multiplexing uses the "rtcp-mux" attribute
-      defined in [RFC5761] in its SDP signaling.
+   This section describes how existing SDP attribute extensions are
+   reused to describe RoQ media flows.
+
+5.1.  SDP Attributes Applying to a QUIC Connection/RTP Session
+
+   This document assumes that an authenticated QUIC connection will be
+   opened using a "roq" ALPN or some other ALPN, as described in
+   Section 4.1 of [I-D.ietf-avtcore-rtp-over-quic].
+
+   The SDP "setup" attribute, defined for media over TCP in [RFC4145],
+   is reused to indicate which endpoint initiates a QUIC connection
+   (whether the endpoint actively opens a QUIC connection, or accepts an
+   incoming QUIC connection.  This attribute MUST be present in SDP
+   offers and answers for RoQ.
+
+   The SDP "connection" attribute, defined for TCP in [RFC4145], is
+   reused to indicate whether the endpoint will open a new QUIC
+   connection, or reuse an existing QUIC connection.  This attribute
+   MUST be present in SDP offers and answers for RoQ.
+
+   Because QUIC itself uses the TLS handshake as described in [RFC9001],
+   the parties to a RoQ session MUST also provide authentication
+   certificates as part of the TLS handshake procedure, as described in
+   Section 5 of [RFC8122].  When self-signed certificates are used,
+   certificate fingerprint is represented in SDP using the fingerprint
+   SDP attribute, as illustrated in Section 3.4 of [RFC8122], in order
+   to provide assurance that two endpoints with no prior relationship
+   are not being subjected to a man-in-the-middle attack.
+
+   [I-D.ietf-avtcore-rtp-over-quic] defines how RTP and RTCP can be
+   multiplexed onto a single QUIC connection.  An application that will
+   perform this multiplexing uses the "rtcp-mux" attribute defined in
+   [RFC5761] in its SDP signaling.
+
+5.2.  SDP Attributes Applying to an SDP Media Line
 
 6.  Work in Progress
 
@@ -490,19 +526,6 @@ Table of Contents
 
 7.1.  Opening a QUIC connection for use with RoQ
 
-   This document assumes that an authenticated QUIC connection will be
-   opened using a "roq" ALPN or some other ALPN, as described in
-   Section 4.1 of [I-D.ietf-avtcore-rtp-over-quic].
-
-   The SDP "setup" attribute, defined for media over TCP in [RFC4145],
-   is reused to indicate which endpoint initiates a QUIC connection
-   (whether the endpoint actively opens a QUIC connection, or accepts an
-   incoming QUIC connection.
-
-   The SDP "connection" attribute, defined for TCP in [RFC4145], is
-   reused to indicate whether the endpoint will open a new QUIC
-   connection, or reuse an existing QUIC connection.
-
    *Editor's Note:* The following considerations still need to be
    checked off in ongoing work.
 
@@ -519,15 +542,6 @@ Table of Contents
    an ICE agent will have already performed ICE candidate pair
    connectivity checking before a QUIC connection can be opened for use
    with RoQ.
-
-   Because QUIC itself uses the TLS handshake as described in [RFC9001],
-   the parties to a RoQ session MUST also provide authentication
-   certificates as part of the the TLS handshake procedure, as described
-   in Section 5 of [RFC8122].  When self-signed certificates are used,
-   certificate fingerprint is represented in SDP using the fingerprint
-   SDP attribute, as illustrated in Section 3.4 of [RFC8122], in order
-   to provide assurance that two endpoints with no prior relationship
-   are not being subjected to a man-in-the-middle attack.
 
    *Editor's Note:* The following considerations still need to be
    checked off in ongoing work.
