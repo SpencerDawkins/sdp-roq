@@ -269,13 +269,17 @@ Because QUIC itself uses the TLS handshake as described in {{!RFC9001}}, the par
 
 {{!I-D.ietf-avtcore-rtp-over-quic}} defines how RTP and RTCP can be multiplexed onto a single QUIC connection. An application that will perform this multiplexing uses the "rtcp-mux" attribute defined in {{!RFC5761}} in its SDP signaling.
 
-## SDP Attributes Applying to an SDP Media Line {#media-line}
-
-
-
 # Work in Progress
 
 **NOTE:** This section is still under construction. The contents are likely to change significantly before settling down!
+
+* Do we need to use SDP "tls-id" attribute, defined in {{?RFC8842}}? That spec is DTLS-specific, but whether it would also apply to TLS/QUIC connections changing five-tuples isn't clear to Spencer. This may require some conversations about QUIC connection migration (and, of course, Multipath QUIC, when that leaves the QUIC working group).
+
+## SDP Attributes Applying to an SDP Media Line {#media-line}
+
+**Editor's Note:** The following considerations still need to be checked off in ongoing work.
+
+* Check QUIC impacts on BUNDLE
 
 ## Negotiating for specific QUIC feedback replacing AVP/AVPF feedback
 
@@ -322,6 +326,8 @@ This SDP offer might be included in a SIP INVITE, for example.
 
 # Implementation Topics
 
+**Editor's Note:** This section (ought to) contain no normative requirements. We should discuss whether moving it to an appendix, or to an Informational document, is more appropriate than leaving it at this location in a standards-track document.
+
 This document focuses on the normative requirements for RoQ endpoints that use SDP for signaling.
 
 Beyond those normative requirements, there are topics that are worth considering as part of implementation work. These topics are not part of "SDP for RoQ", but might be usefully gathered into an appendix or a separate "SDP for RoQ Implementation Guide".
@@ -330,21 +336,19 @@ Beyond those normative requirements, there are topics that are worth considering
 
 **Editor's Note:** The following considerations still need to be checked off in ongoing work.
 
-* Check QUIC impacts on BUNDLE
-
 * Interaction with UDP-Connect to open pinholes in corporate proxies?
 
 ## Implications of using ICE with RoQ {#ice-impl}
 
 Because a peer address is validated during QUIC connection establishment as described in {{Section 8.1 of !RFC9000}}, when a RoQ endpoint uses ICE {{!RFC8445}} to communicate with another RoQ endpoint, an ICE agent will have already performed ICE candidate pair connectivity checking before a QUIC connection can be opened for use with RoQ.
 
+An implementer should be aware that it is possible for a RoQ connection to be subject to "ping"/liveness checks at several different levels:
 
+* QUIC PING frames, as described in {{Section 10.1.2 of !RFC9000}}
+* RTP keepalives, as described in {{Section 10 of ?RFC5245}} and in {{?RFC6263}}
+* ICE consent freshness, as described in {{?RFC7675}}
 
-**Editor's Note:** The following considerations still need to be checked off in ongoing work.
-
-* SDP "tls-id" attribute, defined in {{?RFC8842}}
-
-* QUIC Ping frames and ICE consent freshness (RFC 7675)
+All of the timeout values for these mechanisms are under the implementer's control, and should be chosen holistically (with awareness of the goals of each mechanism).
 
 # Security Considerations
 
