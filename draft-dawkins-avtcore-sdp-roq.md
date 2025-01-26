@@ -1,7 +1,7 @@
 ---
 title: SDP Offer/Answer for RTP over QUIC (RoQ)
 abbrev: SDP O/A for RoQ
-category: std
+category: exp
 
 docname: draft-dawkins-avtcore-sdp-roq-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
@@ -26,7 +26,7 @@ venue:
 author:
  -
     fullname: "Spencer Dawkins"
-    organization: Unaffiliated
+    organization: Wonder Hamster Internetworking LLC
     country: United States of America
     email: spencerdawkins.ietf@gmail.com
  -
@@ -52,25 +52,25 @@ informative:
 
 This document describes several new SDP "proto" and "attribute-name" attribute values in the "Session Description Protocol (SDP) Parameters" IANA registry that can be used to describe QUIC transport for RTP and RTCP packets, and describes how SDP Offer/Answer can be used to set up an RTP connection using QUIC as a transport protocol.
 
-These new values are necessary to allow the use of QUIC as an underlying transport protocol for applications such as SIP and WebRTC that commonly use SDP as a session signaling protocol to set up RTP connections.
+These new values are necessary to allow the use of QUIC as an underlying transport protocol for RTP applications that commonly use SDP as a session signaling protocol to set up RTP connections, such as SIP and WebRTC.
 
 --- middle
 
 # Introduction {#intro}
 
-This document describes several new SDP "proto" and "attribute-name" attribute values in the "Session Description Protocol (SDP) Parameters" IANA registry ({{SDP-protos}} and {{SDP-attribute-name}}) that can be used to describe QUIC transport for RTP and RTCP packets, and describes how SDP Offer/Answer ({{!RFC3264}}) can be used to set up an RTP ({{!RFC3550}}) connection using QUIC ({{!RFC9000}} and related specifications), as defined in {{!I-D.ietf-avtcore-rtp-over-quic}}.
+This document describes several new SDP "proto" and "attribute-name" attribute values in the "Session Description Protocol (SDP) Parameters" IANA registry ({{SDP-protos}} and {{SDP-attribute-name}}) that can be used to describe QUIC transport for RTP and RTCP packets (hereafter abbreviated as "RoQ"), and describes how SDP Offer/Answer ({{!RFC3264}}) can be used to set up an ({{!RFC3550}}) connection using QUIC ({{!RFC9000}} and related specifications), as defined in {{!I-D.ietf-avtcore-rtp-over-quic}}.
 
-These new values are necessary to allow the use of QUIC as an underlying transport protocol for applications such as SIP ({{?RFC3261}}) and WebRTC ({{?RFC8825}}) that commonly use SDP as a session signaling protocol to set up RTP connections.
+These new values are necessary to allow the use of QUIC as an underlying transport protocol for RTP applications that commonly use SDP as a session signaling protocol to set up RTP connections, such as SIP ({{?RFC3261}}) and WebRTC ({{?RFC8825}}).
 
 ##Scope of this document {#scope}
 
-This document focuses on the IANA registration and description of the RTP sessions using SDP Offer/Answer, as would be the case for many current RTP applications in common use, such as SIP ({{?RFC3261}}) and WebRTC ({{?RFC8825}}).
+The normative descriptions and requirements for RoQ SDP appear in {{idents-atts}} and {{new-attrs}}.
 
 ## Notes for Readers {#readernotes}
 
 (Note to RFC Editor - if this document ever reaches you, please remove this section)
 
-This document is intended for publication as a standards-track RFC in the IETF stream, but thus far has not been adopted by any IETF working group, so does not carry any special status within the IETF.
+This document has not yet been adopted by any IETF working group, so does not carry any special status within the IETF.
 
 # Conventions and Definitions
 
@@ -201,7 +201,7 @@ Type of attribute:  media
 
 Mux category:  IDENTICAL
 
-> **Author's Note:** This specification sets the mux category (as discussed in Section 4 of {{?RFC8859}}) as IDENTICAL, as an RTP mixer which is multiplexing several incoming streams onto one connection needs to provide the same quidance to a RoQ receiver for all multiplexed media flows.
+> **NOTE:** This specification sets the mux category (as discussed in Section 4 of {{?RFC8859}}) as IDENTICAL, as an RTP mixer which is multiplexing several incoming streams onto one connection needs to provide the same quidance to a RoQ receiver for all multiplexed media flows.
 
 Subject to charset:  No
 
@@ -233,7 +233,7 @@ Type of attribute:  media
 
 Mux category:  CAUTION
 
-> **Author's Note:** This specification sets the mux category (as discussed in Section 4 of {{?RFC8859}}) as CAUTION, as an RTP mixer which is multiplexing several incoming streams onto one connection needs to ensure that RoQ Flow Identifiers do not overlap, and might need to rewrite the Flow Identifiers in received streams when further multiplexing them.
+> **NOTE:** This specification sets the mux category (as discussed in Section 4 of {{?RFC8859}}) as CAUTION, as an RTP mixer which is multiplexing several incoming streams onto one connection needs to ensure that RoQ Flow Identifiers do not overlap, and might need to rewrite the Flow Identifiers in received streams when further multiplexing them.
 
 Subject to charset:  No
 
@@ -253,11 +253,13 @@ Syntax:
 
 The RoQ flow identifier range is between 0 and 4611686018427387903 (2^62 - 1) (both included). Leading zeroes MUST NOT be used.
 
-# Interaction with Existing SDP Attributes {#existing-attributes}
+## Applicability of Existing SDP Attributes to RoQ {#existing-attributes}
 
-This section describes how existing SDP attribute extensions are reused to describe RoQ media flows.
+This section does not introduce new SDP attribute extensions, but describes how some existing SDP attribute extensions are reused to describe RoQ media flows.
 
-## SDP Attributes Applying to a QUIC Connection/RTP Session {#conn-level}
+**Editor's Note:** The goal for this section is to describe how existing SDP attributes are used differently, to support RoQ, and to be able to make the statement that other existing SDP attribute extensions can be reused with RoQ, with no special considerations. Special considerations we've missed are especially welcomed!
+
+### SDP Attributes Applying to a QUIC Connection/RTP Session {#conn-level}
 
 This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of {{!I-D.ietf-avtcore-rtp-over-quic}}.
 
@@ -271,29 +273,53 @@ Because QUIC itself uses the TLS handshake as described in {{!RFC9001}}, the par
 
 # Work in Progress
 
-**NOTE:** This section is still under construction. The contents are likely to change significantly before settling down!
+**Editor's Note:** Do we need to use SDP "tls-id" attribute, defined in {{?RFC8842}}? That spec is DTLS-specific, but whether it would also apply to TLS/QUIC connections changing five-tuples isn't clear to Spencer. This may require some conversations about QUIC connection migration (and, of course, Multipath QUIC, when that leaves the QUIC working group).
 
-* Do we need to use SDP "tls-id" attribute, defined in {{?RFC8842}}? That spec is DTLS-specific, but whether it would also apply to TLS/QUIC connections changing five-tuples isn't clear to Spencer. This may require some conversations about QUIC connection migration (and, of course, Multipath QUIC, when that leaves the QUIC working group).
-
-## SDP Attributes Applying to an SDP Media Line {#media-line}
-
-**Editor's Note:** The following considerations still need to be checked off in ongoing work.
-
-* Check QUIC impacts on BUNDLE
+**Editor's Note:** Check QUIC impacts on BUNDLE
 
 ## Negotiating for specific QUIC feedback replacing AVP/AVPF feedback
 
- Things to remember in this section
+**Editor's Note:** Check what we might say about RFC 4585 AVPF
 
-* What we might say about RFC 4585 AVPF
+**Editor's Note:** Check what we might say about RFC 5104 Codec Control Messages
 
-* What we might say about RFC 5104 Codec Control Messages
+**Editor's Note:** Check what we might say about RFC 8888 congestion control
 
-* What we might say about RFC 8888 congestion control
+# Implementation Topics {#impl-topics}
 
-## A QUIC/RTP/AVPF Offer Example
+**Editor's Note:** This section contains (ought to contain) no normative requirements.
 
-**Editor's Note:** We will need to clean this example up, after discussion on the rest of the document.
+This document focuses on the normative requirements for RoQ endpoints that use SDP for signaling.
+
+Beyond those normative requirements, there are topics that are worth considering as part of implementation work. These topics are not part of "SDP for RoQ", but are gathered here for ease of reference. These topics might be moved into an appendix or a separate "SDP for RoQ Implementation Guide".
+
+## Opening a QUIC connection for use with RoQ
+
+**Editor's Note:** The following considerations still need to be checked off in ongoing work.
+
+* Interaction with UDP-Connect to open pinholes in corporate proxies?
+
+## Implications of using ICE with RoQ {#ice-impl}
+
+Because a peer address is validated during QUIC connection establishment as described in {{Section 8.1 of !RFC9000}}, when a RoQ endpoint uses ICE {{!RFC8445}} to communicate with another RoQ endpoint, an ICE agent will have already performed ICE candidate pair connectivity checking before a QUIC connection can be opened for use with RoQ.
+
+An implementer should be aware that it is possible for a RoQ connection to be subject to "ping"/liveness checks at several different levels:
+
+* QUIC PING frames, as described in {{Section 10.1.2 of !RFC9000}}
+* ICE keepalives, as described in {{Section 10 of ?RFC5245}} and in {{?RFC6263}}
+* ICE consent freshness, as described in {{?RFC7675}}
+* RTCP packets, as described in {{Section 6.2 of !RFC3550}}
+
+The following considerations are worth reviewing for implementers.
+
+* QUIC PING frames are entirely under the control of an implementation. If a QUIC connection carries RTP/RTCP traffic, the RTCP transmission interval is likely to suffice for RTP liveness detection.
+* ICE keepalives, as described in {{Section 10 of ?RFC5245}} and in {{?RFC6263}}
+* ICE consent freshness, as described in {{?RFC7675}}
+* RTCP packets, as described in {{Section 6.2 of !RFC3550}}
+
+# A QUIC/RTP/AVPF Offer Example {#offer-example}
+
+**Editor's Note:** Spencer has been updating this example while working on the document, but we will need to examine it carefully, before requesting Working Group Last Call.
 
 A complete example of an SDP offer using QUIC/RTP/AVPF might look like:
 
@@ -323,32 +349,6 @@ This example is largely based on an example appearing in {{!RFC8866}}, Section 5
 Because QUIC uses connections for both streams and datagrams, we are reusing two session- and media-level SDP attributes from {{SDP-attribute-name}} that were defined in {{!RFC4145}} for use with TCP: setup and connection.
 
 This SDP offer might be included in a SIP INVITE, for example.
-
-# Implementation Topics
-
-**Editor's Note:** This section (ought to) contain no normative requirements. We should discuss whether moving it to an appendix, or to an Informational document, is more appropriate than leaving it at this location in a standards-track document.
-
-This document focuses on the normative requirements for RoQ endpoints that use SDP for signaling.
-
-Beyond those normative requirements, there are topics that are worth considering as part of implementation work. These topics are not part of "SDP for RoQ", but might be usefully gathered into an appendix or a separate "SDP for RoQ Implementation Guide".
-
-## Opening a QUIC connection for use with RoQ
-
-**Editor's Note:** The following considerations still need to be checked off in ongoing work.
-
-* Interaction with UDP-Connect to open pinholes in corporate proxies?
-
-## Implications of using ICE with RoQ {#ice-impl}
-
-Because a peer address is validated during QUIC connection establishment as described in {{Section 8.1 of !RFC9000}}, when a RoQ endpoint uses ICE {{!RFC8445}} to communicate with another RoQ endpoint, an ICE agent will have already performed ICE candidate pair connectivity checking before a QUIC connection can be opened for use with RoQ.
-
-An implementer should be aware that it is possible for a RoQ connection to be subject to "ping"/liveness checks at several different levels:
-
-* QUIC PING frames, as described in {{Section 10.1.2 of !RFC9000}}
-* RTP keepalives, as described in {{Section 10 of ?RFC5245}} and in {{?RFC6263}}
-* ICE consent freshness, as described in {{?RFC7675}}
-
-All of the timeout values for these mechanisms are under the implementer's control, and should be chosen holistically (with awareness of the goals of each mechanism).
 
 # Security Considerations
 
@@ -392,3 +392,5 @@ The authors thank Bernard Aboba and Mathis Westerlund for comments on various pr
 **Editor's Note:** Who else should we name in this paragraph? I should look through the minutes from previous AVTCORE meetings, to see who I missed.
 
 The authors thank Mathis Engelbart for helping to keep this draft aligned with {{!I-D.ietf-avtcore-rtp-over-quic}}.
+
+A significant amount of work on this draft happened while Spencer was affiliated with Tencent America LLC. Spencer appreciates that support.
