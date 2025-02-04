@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-30T01:00:37.606951+00:00",
+  "timestamp": "2025-02-04T01:01:48.974361+00:00",
   "repo": "SpencerDawkins/sdp-roq",
   "labels": [
     {
@@ -378,7 +378,7 @@
       "id": "PR_kwDOMBStD86FSgJP",
       "title": "Update draft-dawkins-avtcore-sdp-roq.md",
       "url": "https://github.com/SpencerDawkins/sdp-roq/pull/10",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "SpencerDawkins",
       "authorAssociation": "OWNER",
       "assignees": [
@@ -387,17 +387,19 @@
       "labels": [],
       "body": "This is a significant change to the main branch - I'm leaving it as a PR for now.",
       "createdAt": "2024-12-16T02:06:07Z",
-      "updatedAt": "2025-01-27T02:01:11Z",
+      "updatedAt": "2025-02-02T18:25:05Z",
       "baseRepository": "SpencerDawkins/sdp-roq",
       "baseRefName": "main",
       "baseRefOid": "8a121fd732cb4d2e555b84a833c7641d58a9f729",
       "headRepository": "SpencerDawkins/sdp-roq",
       "headRefName": "large-change",
-      "headRefOid": "e172eae9a607c9daac702b969e65ffa8fea9e180",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "cb9b8e933d32adcc5fa799d66f976cc1d94959e7",
+      "closedAt": "2025-02-02T18:25:05Z",
+      "mergedAt": "2025-02-02T18:25:05Z",
+      "mergedBy": "SpencerDawkins",
+      "mergeCommit": {
+        "oid": "aa1d62f3c6575196e0b5475bffdbc0c58467be27"
+      },
       "comments": [],
       "reviews": []
     }
