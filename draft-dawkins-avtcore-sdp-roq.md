@@ -261,7 +261,12 @@ The RoQ flow identifier range is between 0 and 4611686018427387903 (2^62 - 1) (b
 
 This section does not introduce new SDP attribute extensions, but describes how some existing SDP attribute extensions are reused to describe RoQ media flows.
 
-**Editor's Note:** The goal for this section is to describe how existing SDP attributes are used differently, to support RoQ, and to be able to make the statement that other existing SDP attribute extensions can be reused with RoQ, with no special considerations. Special considerations we've missed are especially welcomed!
+**Editors' Question:** We have two goals for this section. 
+
+* To describe how existing SDP attributes are used differently in order to support RoQ, and 
+* To be able to make the statement that other existing SDP attribute extensions can be reused with RoQ, with no special considerations. 
+
+What other considerations have we missed, that need to be mentioned here?
 
 This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of {{!I-D.ietf-avtcore-rtp-over-quic}}.
 
@@ -273,11 +278,11 @@ Because QUIC itself uses the TLS handshake as described in {{!RFC9001}}, the par
 
 {{!I-D.ietf-avtcore-rtp-over-quic}} defines how RTP and RTCP can be multiplexed onto a single QUIC connection. An application that will perform this multiplexing MUST include the "rtcp-mux" attribute defined in {{!RFC5761}} in its SDP signaling.
 
-**Editor's Note:** Do we need to mention the SDP "tls-id" attribute, defined in {{?RFC8842}}? That spec is DTLS-specific, but whether it would also apply to TLS/QUIC connections changing five-tuples isn't clear to Spencer. This may require some conversations about QUIC connection migration (and, of course, Multipath QUIC, when {{?I-D.draft-ietf-quic-multipath}} leaves the QUIC working group).
+**Editors' Question:** Do we need to mention the SDP "tls-id" attribute, defined in {{?RFC8842}}? That spec is DTLS-specific, but whether it would also apply to TLS/QUIC connections changing five-tuples isn't clear to Spencer. This may require some conversations about QUIC connection migration (and, of course, Multipath QUIC, when {{?I-D.draft-ietf-quic-multipath}} leaves the QUIC working group).
 
 # A QUIC/RTP/AVPF Offer Example {#offer-example}
 
-**Editor's Note:** Spencer has been updating this example while working on the document, but we will need to examine it carefully, before requesting Working Group Last Call.
+**Editors' Question:** Spencer has been updating this example while working on the document, but we will need to examine it carefully, before requesting Working Group Last Call.
 
 A complete example of an SDP offer using QUIC/RTP/AVPF might look like:
 
@@ -310,13 +315,13 @@ This SDP offer might be included in a SIP INVITE, for example.
 
 # Implementation Topics {#impl-topics}
 
-**Editor's Note:** {{impl-topics}} contains (ought to contain) no normative requirements.
+**Editors' Question:** {{impl-topics}} contains (ought to contain) no normative requirements.
 
 {{idents-atts}} and {{new-attrs}} of this document provide normative requirements for RoQ endpoints that use SDP for signaling.
 
 Beyond those normative requirements, there are topics that are worth considering as part of implementation work. These topics are not part of "SDP for RoQ", but are gathered here for ease of reference. These topics might be moved into an appendix or a separate "SDP for RoQ Implementation Guide", or even included in the GitHub repository Wiki for this document.
 
-**Editor's Note:** We've been asked about interaction with UDP-Connect to open pinholes in corporate proxies. What is there to say about that, in this specification?
+**Editors' Question:** We've been asked about interaction with UDP-Connect to open pinholes in corporate proxies. What is there to say about that, in this specification?
 
 ## Bundling Considerations {#bundle-cons}
 
@@ -336,7 +341,7 @@ It is assumed that an implementer will review the application requirements, the 
 
 More information about what RTCP feedback might be replaced by QUIC statistics, and what is possible, appears in {{Appendix B of !I-D.ietf-avtcore-rtp-over-quic}}.
 
-**Editor's Note:** The API between QUIC and RoQ is, of course, a private matter, but in at least some cases, it might be useful to specify specific QUIC feedback substitutions so that the other RoQ endpoint does not provide RTCP feedback that this RoQ endpoint does not need and does not plan to use. **We almost certainly need implementation and deployment experience before we can do more than offer a strawman proposal.** Spencer suggests that we include any IETF-specified QUIC feedback substitutions in separate documents, as we do with RTCP extensions today, or even include them in the GitHub repository Wiki for this document.
+**Editors' Question:** The API between QUIC and RoQ is, of course, a private matter, but in at least some cases, it might be useful to specify specific QUIC feedback substitutions so that the other RoQ endpoint does not provide RTCP feedback that this RoQ endpoint does not need and does not plan to use. **We almost certainly need implementation and deployment experience before we can do more than offer a strawman proposal.** Spencer suggests that we include any IETF-specified QUIC feedback substitutions in separate documents, as we do with RTCP extensions today, or even include them in the GitHub repository Wiki for this document.
 
 ## Implications of Congestion Control {#cong-ctrl}
 
@@ -381,7 +386,7 @@ If this is not a good plan, there are two alternatives.
 * We can REQUIRE conformant RoQ middleboxes to bridge between AVP and AVPF profiles carried over RoQ and SAVP and SAVPF profiles carried using other transports, so that insecure media flows are not relayed over insecure transport protocols.
 * Alternatively, an implementation can use SFRAME as described in {{!RFC9605}} to achieve end-to-end media security, at the price of disallowing some types of translating middleboxes (for example, Topo-Media-Translator middleboxes, as described in {{Section 3.2.1.2 of !RFC7667}}.
 
-**Editor's Note:** We will need discussion within the working group to determine whether we do need to include QUIC/RTP/SAVP and QUIC/RTP/SAVPF in this specification.
+**Editors' Question:** We will need discussion within the working group to determine whether we do need to include QUIC/RTP/SAVP and QUIC/RTP/SAVPF in this specification.
 
 # IANA Considerations
 
@@ -404,7 +409,7 @@ The authors thank Sam Hurst for sharing his thoughts about the challenges of dev
 
 The authors thank Bernard Aboba and Mathis Westerlund for comments on various previous versions of this specification, under a variety of draft names.
 
-**Editor's Note:** Who else should we name in this paragraph? I should look through the minutes from previous AVTCORE meetings, to see who I missed.
+**Editors' Question:** Who else should we name in this paragraph? I should look through the minutes from previous AVTCORE meetings, to see who I missed.
 
 The authors thank Mathis Engelbart for helping to keep this draft aligned with {{!I-D.ietf-avtcore-rtp-over-quic}}.
 
