@@ -406,11 +406,16 @@ Table of Contents
    describes how some existing SDP attribute extensions are reused to
    describe RoQ media flows.
 
-   *Editor's Note:* The goal for this section is to describe how
-   existing SDP attributes are used differently, to support RoQ, and to
-   be able to make the statement that other existing SDP attribute
-   extensions can be reused with RoQ, with no special considerations.
-   Special considerations we've missed are especially welcomed!
+   We have two goals for this section:
+
+   *  To describe how existing SDP attributes are used differently in
+      order to support RoQ, and
+
+   *  To be able to make the statement that other existing SDP attribute
+      extensions can be reused with RoQ, with no special considerations.
+
+   *What other considerations have we missed, that need to be mentioned
+   here?*
 
    This document assumes that an authenticated QUIC connection will be
    opened using a "roq" ALPN or some other ALPN, as described in
@@ -552,8 +557,8 @@ Table of Contents
 
 7.  Implementation Topics
 
-   *Editor's Note:* Section 7 contains (ought to contain) no normative
-   requirements.
+   *Editors' Question:* Section 7 contains (ought to contain) no
+   normative requirements.
 
    Section 3 and Section 4 of this document provide normative
    requirements for RoQ endpoints that use SDP for signaling.
@@ -565,9 +570,9 @@ Table of Contents
    RoQ Implementation Guide", or even included in the GitHub repository
    Wiki for this document.
 
-   *Editor's Note:* We've been asked about interaction with UDP-Connect
-   to open pinholes in corporate proxies.  What is there to say about
-   that, in this specification?
+   *Editors' Question:* We've been asked about interaction with UDP-
+   Connect to open pinholes in corporate proxies.  What is there to say
+   about that, in this specification?
 
 7.1.  Bundling Considerations
 
@@ -612,7 +617,7 @@ Table of Contents
    statistics, and what is possible, appears in Appendix B of
    [I-D.ietf-avtcore-rtp-over-quic].
 
-   *Editor's Note:* The API between QUIC and RoQ is, of course, a
+   *Editors' Question:* The API between QUIC and RoQ is, of course, a
    private matter, but in at least some cases, it might be useful to
    specify specific QUIC feedback substitutions so that the other RoQ
    endpoint does not provide RTCP feedback that this RoQ endpoint does
@@ -722,9 +727,9 @@ Table of Contents
       Topo-Media-Translator middleboxes, as described in Section 3.2.1.2
       of [RFC7667].
 
-   *Editor's Note:* We will need discussion within the working group to
-   determine whether we do need to include QUIC/RTP/SAVP and QUIC/RTP/
-   SAVPF in this specification.
+   *Editors' Question:* We will need discussion within the working group
+   to determine whether we do need to include QUIC/RTP/SAVP and
+   QUIC/RTP/SAVPF in this specification.
 
 9.  IANA Considerations
 
@@ -951,9 +956,9 @@ Acknowledgments
    various previous versions of this specification, under a variety of
    draft names.
 
-   *Editor's Note:* Who else should we name in this paragraph?  I should
-   look through the minutes from previous AVTCORE meetings, to see who I
-   missed.
+   *Editors' Question:* Who else should we name in this paragraph?  I
+   should look through the minutes from previous AVTCORE meetings, to
+   see who I missed.
 
    The authors thank Mathis Engelbart for helping to keep this draft
    aligned with [I-D.ietf-avtcore-rtp-over-quic].

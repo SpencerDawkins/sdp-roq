@@ -1526,9 +1526,18 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-special-considerations-for-" class="section-name selfRef">Special Considerations for Selected SDP Attributes When Using RoQ Transport</a>
       </h2>
 <p id="section-5-1">This section does not introduce new SDP attribute extensions, but describes how some existing SDP attribute extensions are reused to describe RoQ media flows.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<p id="section-5-2"><strong>Editor's Note:</strong> The goal for this section is to describe how existing SDP attributes are used differently, to support RoQ, and to be able to make the statement that other existing SDP attribute extensions can be reused with RoQ, with no special considerations. Special considerations we've missed are especially welcomed!<a href="#section-5-2" class="pilcrow">¶</a></p>
-<p id="section-5-3">This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of <span>[<a href="#I-D.ietf-avtcore-rtp-over-quic" class="cite xref">I-D.ietf-avtcore-rtp-over-quic</a>]</span>.<a href="#section-5-3" class="pilcrow">¶</a></p>
-<p id="section-5-4"><strong>Editor's Note:</strong> Do we need to mention the SDP "tls-id" attribute, defined in <span>[<a href="#RFC8842" class="cite xref">RFC8842</a>]</span>? That spec is DTLS-specific, but whether it would also apply to TLS/QUIC connections changing five-tuples isn't clear to Spencer. This may require some conversations about QUIC connection migration (and, of course, Multipath QUIC, when <span>[<a href="#I-D.draft-ietf-quic-multipath" class="cite xref">I-D.draft-ietf-quic-multipath</a>]</span> leaves the QUIC working group).<a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-2">We have two goals for this section:<a href="#section-5-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-3.1">
+          <p id="section-5-3.1.1">To describe how existing SDP attributes are used differently in order to support RoQ, and<a href="#section-5-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-5-3.2">
+          <p id="section-5-3.2.1">To be able to make the statement that other existing SDP attribute extensions can be reused with RoQ, with no special considerations.<a href="#section-5-3.2.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-5-4"><strong>What other considerations have we missed, that need to be mentioned here?</strong><a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-5">This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of <span>[<a href="#I-D.ietf-avtcore-rtp-over-quic" class="cite xref">I-D.ietf-avtcore-rtp-over-quic</a>]</span>.<a href="#section-5-5" class="pilcrow">¶</a></p>
+<p id="section-5-6"><strong>Editor's Note:</strong> Do we need to mention the SDP "tls-id" attribute, defined in <span>[<a href="#RFC8842" class="cite xref">RFC8842</a>]</span>? That spec is DTLS-specific, but whether it would also apply to TLS/QUIC connections changing five-tuples isn't clear to Spencer. This may require some conversations about QUIC connection migration (and, of course, Multipath QUIC, when <span>[<a href="#I-D.draft-ietf-quic-multipath" class="cite xref">I-D.draft-ietf-quic-multipath</a>]</span> leaves the QUIC working group).<a href="#section-5-6" class="pilcrow">¶</a></p>
 <div id="setup">
 <section id="section-5.1">
         <h3 id="name-the-sdp-setup-attribute">
@@ -1692,10 +1701,10 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       <h2 id="name-implementation-topics">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-implementation-topics" class="section-name selfRef">Implementation Topics</a>
       </h2>
-<p id="section-7-1"><strong>Editor's Note:</strong> <a href="#impl-topics" class="auto internal xref">Section 7</a> contains (ought to contain) no normative requirements.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-1"><strong>Editors' Question:</strong> <a href="#impl-topics" class="auto internal xref">Section 7</a> contains (ought to contain) no normative requirements.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <p id="section-7-2"><a href="#idents-atts" class="auto internal xref">Section 3</a> and <a href="#new-attrs" class="auto internal xref">Section 4</a> of this document provide normative requirements for RoQ endpoints that use SDP for signaling.<a href="#section-7-2" class="pilcrow">¶</a></p>
 <p id="section-7-3">Beyond those normative requirements, there are topics that are worth considering as part of implementation work. These topics are not part of "SDP for RoQ", but are gathered here for ease of reference. These topics might be moved into an appendix or a separate "SDP for RoQ Implementation Guide", or even included in the GitHub repository Wiki for this document.<a href="#section-7-3" class="pilcrow">¶</a></p>
-<p id="section-7-4"><strong>Editor's Note:</strong> We've been asked about interaction with UDP-Connect to open pinholes in corporate proxies. What is there to say about that, in this specification?<a href="#section-7-4" class="pilcrow">¶</a></p>
+<p id="section-7-4"><strong>Editors' Question:</strong> We've been asked about interaction with UDP-Connect to open pinholes in corporate proxies. What is there to say about that, in this specification?<a href="#section-7-4" class="pilcrow">¶</a></p>
 <div id="bundle-cons">
 <section id="section-7.1">
         <h3 id="name-bundling-considerations">
@@ -1715,7 +1724,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <p id="section-7.2-1"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-avtcore-rtp-over-quic-12#section-10.4" class="relref">Section 10.4</a> of [<a href="#I-D.ietf-avtcore-rtp-over-quic" class="cite xref">I-D.ietf-avtcore-rtp-over-quic</a>]</span> describes how some RTCP feedback can be replaced by equivalent statistics that are already collected by QUIC. The exact RTCP feedback that can be replaced depends on the QUIC statistics exposed by the underlying QUIC implementation, and these QUIC statistics might depend in turn on QUIC extensions supported in the underlying QUIC implementation. The set of possible relevant QUIC extensions is not fixed, but some discussion appears in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-avtcore-rtp-over-quic-12#section-11" class="relref">Section 11</a> of [<a href="#I-D.ietf-avtcore-rtp-over-quic" class="cite xref">I-D.ietf-avtcore-rtp-over-quic</a>]</span>. For these reasons, decisions about what RTCP feedback can be replaced will always be media-dependent and implementation-dependent.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.2-2">It is assumed that an implementer will review the application requirements, the RTP proto in use, the available RTCP feedback for the media types being transferred, and available QUIC statistics, and will do the right thing.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.2-3">More information about what RTCP feedback might be replaced by QUIC statistics, and what is possible, appears in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-avtcore-rtp-over-quic-12#appendix-B" class="relref">Appendix B</a> of [<a href="#I-D.ietf-avtcore-rtp-over-quic" class="cite xref">I-D.ietf-avtcore-rtp-over-quic</a>]</span>.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
-<p id="section-7.2-4"><strong>Editor's Note:</strong> The API between QUIC and RoQ is, of course, a private matter, but in at least some cases, it might be useful to specify specific QUIC feedback substitutions so that the other RoQ endpoint does not provide RTCP feedback that this RoQ endpoint does not need and does not plan to use. <strong>We almost certainly need implementation and deployment experience before we can do more than offer a strawman proposal.</strong> Spencer suggests that we include any IETF-specified QUIC feedback substitutions in separate documents, as we do with RTCP extensions today, or even include them in the GitHub repository Wiki for this document.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.2-4"><strong>Editors' Question:</strong> The API between QUIC and RoQ is, of course, a private matter, but in at least some cases, it might be useful to specify specific QUIC feedback substitutions so that the other RoQ endpoint does not provide RTCP feedback that this RoQ endpoint does not need and does not plan to use. <strong>We almost certainly need implementation and deployment experience before we can do more than offer a strawman proposal.</strong> Spencer suggests that we include any IETF-specified QUIC feedback substitutions in separate documents, as we do with RTCP extensions today, or even include them in the GitHub repository Wiki for this document.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="cong-ctrl">
@@ -1795,7 +1804,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
             <p id="section-8.1-4.2.1">Alternatively, an implementation can use SFRAME as described in <span>[<a href="#RFC9605" class="cite xref">RFC9605</a>]</span> to achieve end-to-end media security, at the price of disallowing some types of translating middleboxes (for example, Topo-Media-Translator middleboxes, as described in <span><a href="https://rfc-editor.org/rfc/rfc7667#section-3.2.1.2" class="relref">Section 3.2.1.2</a> of [<a href="#RFC7667" class="cite xref">RFC7667</a>]</span>.<a href="#section-8.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-8.1-5"><strong>Editor's Note:</strong> We will need discussion within the working group to determine whether we do need to include QUIC/RTP/SAVP and QUIC/RTP/SAVPF in this specification.<a href="#section-8.1-5" class="pilcrow">¶</a></p>
+<p id="section-8.1-5"><strong>Editors' Question:</strong> We will need discussion within the working group to determine whether we do need to include QUIC/RTP/SAVP and QUIC/RTP/SAVPF in this specification.<a href="#section-8.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2004,7 +2013,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       </h2>
 <p id="appendix-A-1">The authors thank Sam Hurst for sharing his thoughts about the challenges of developing SDP for RoQ, and for providing specific comments and draft text.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <p id="appendix-A-2">The authors thank Bernard Aboba and Mathis Westerlund for comments on various previous versions of this specification, under a variety of draft names.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
-<p id="appendix-A-3"><strong>Editor's Note:</strong> Who else should we name in this paragraph? I should look through the minutes from previous AVTCORE meetings, to see who I missed.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+<p id="appendix-A-3"><strong>Editors' Question:</strong> Who else should we name in this paragraph? I should look through the minutes from previous AVTCORE meetings, to see who I missed.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
 <p id="appendix-A-4">The authors thank Mathis Engelbart for helping to keep this draft aligned with <span>[<a href="#I-D.ietf-avtcore-rtp-over-quic" class="cite xref">I-D.ietf-avtcore-rtp-over-quic</a>]</span>.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
 <p id="appendix-A-5">A significant amount of work on this draft happened while Spencer was affiliated with Tencent America LLC. Spencer appreciates that support.<a href="#appendix-A-5" class="pilcrow">¶</a></p>
 </section>
