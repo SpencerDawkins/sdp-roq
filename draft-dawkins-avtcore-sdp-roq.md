@@ -20,8 +20,8 @@ venue:
   type: "Working Group"
   mail: "avt@ietf.org"
   arch: "https://mailarchive.ietf.org/arch/browse/avt/"
-  github: "SpencerDawkins/sdp-roq"
-  latest: "https://SpencerDawkins.github.io/sdp-roq/draft-dawkins-avtcore-sdp-roq.html"
+  github: "ietf-wg-avtcore/sdp-roq"
+  latest: "https://github.com/ietf-wg-avtcore/sdp-roq/draft-dawkins-avtcore-sdp-roq.html"
 
 author:
  -
