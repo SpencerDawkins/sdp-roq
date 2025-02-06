@@ -270,46 +270,54 @@ What other considerations have we missed, that need to be mentioned here?
 
 This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of {{!I-D.ietf-avtcore-rtp-over-quic}}.
 
+**Editor's Note:** Do we need to mention the SDP "tls-id" attribute, defined in {{?RFC8842}}? That spec is DTLS-specific, but whether it would also apply to TLS/QUIC connections changing five-tuples isn't clear to Spencer. This may require some conversations about QUIC connection migration (and, of course, Multipath QUIC, when {{?I-D.draft-ietf-quic-multipath}} leaves the QUIC working group).
+
+## The SDP "setup" Attribute {#setup}
+
 The SDP "setup" attribute, defined for media over TCP in {{!RFC4145}}, is reused to indicate which endpoint initiates a QUIC connection (whether the endpoint actively opens a QUIC connection, or accepts an incoming QUIC connection. This attribute MUST be present in SDP offers and answers for RoQ.
+
+## The SDP "connection" Attribute {#connect}
 
 The SDP "connection" attribute, defined for TCP in {{!RFC4145}}, is reused to indicate whether the endpoint will open a new QUIC connection, or reuse an existing QUIC connection. This attribute MUST be present in SDP offers and answers for RoQ.
 
+## The SDP "fingerprint" Attribute {#fingerprint}
+
 Because QUIC itself uses the TLS handshake as described in {{!RFC9001}}, the parties to a RoQ session MUST also provide authentication certificates as part of the TLS handshake procedure, as described in {{Section 5 of !RFC8122}}. When self-signed certificates are used, certificate fingerprint is represented in SDP using the fingerprint SDP attribute, as illustrated in {{Section 3.4 of !RFC8122}}, in order to provide assurance that two endpoints with no prior relationship are not being subjected to a man-in-the-middle attack.
+
+## The SDP "rtcp-mux" Attribute {#rtcp-mux}
 
 {{!I-D.ietf-avtcore-rtp-over-quic}} defines how RTP and RTCP can be multiplexed onto a single QUIC connection. An application that will perform this multiplexing MUST include the "rtcp-mux" attribute defined in {{!RFC5761}} in its SDP signaling.
 
-**Editors' Question:** Do we need to mention the SDP "tls-id" attribute, defined in {{?RFC8842}}? That spec is DTLS-specific, but whether it would also apply to TLS/QUIC connections changing five-tuples isn't clear to Spencer. This may require some conversations about QUIC connection migration (and, of course, Multipath QUIC, when {{?I-D.draft-ietf-quic-multipath}} leaves the QUIC working group).
-
 # A QUIC/RTP/AVPF Offer Example {#offer-example}
 
-**Editors' Question:** Spencer has been updating this example while working on the document, but we will need to examine it carefully, before requesting Working Group Last Call.
+**Editor's Note:** Spencer has been updating this example while working on the document, but we will need to review it carefully, before requesting Working Group Last Call.
 
 A complete example of an SDP offer using QUIC/RTP/AVPF might look like:
 
 |SDP line | Notes |
-|v=0 |Same as {{!RFC8866}}|
-|o=jdoe 3724394400 3724394405 IN IP4 198.51.100.1 |Same as {{!RFC8866}}|
-|s=Call to John Smith |Same as {{!RFC8866}}|
-|i=SDP Offer #1 |Same as {{!RFC8866}}|
-|u=http://www.jdoe.example.com/home.html |Same as {{!RFC8866}}|
-|e=Jane Doe <jane@jdoe.example.com> |Same as {{!RFC8866}}|
-|p=+1 617 555-6011 |Same as {{!RFC8866}}|
-|c=IN IP4 198.51.100.1 |Same as {{!RFC8866}}|
-|t=0 0 |Same as {{!RFC8866}}|
-|m=audio 49170 RTP/AVP 0 |Same as {{!RFC8866}}|
+|v=0 |Same as {{Section 5 of !RFC8866}}|
+|o=jdoe 3724394400 3724394405 IN IP4 198.51.100.1 |Same as {{Section 5 of !RFC8866}}|
+|s=Call to John Smith |Same as {{Section 5 of !RFC8866}}|
+|i=SDP Offer #1 |Same as {{Section 5 of !RFC8866}}|
+|u=http://www.jdoe.example.com/home.html |Same as {{Section 5 of !RFC8866}}|
+|e=Jane Doe <jane@jdoe.example.com> |Same as {{Section 5 of !RFC8866}}|
+|p=+1 617 555-6011 |Same as {{Section 5 of !RFC8866}}|
+|c=IN IP4 198.51.100.1 |Same as {{Section 5 of !RFC8866}}|
+|t=0 0 |Same as {{Section 5 of !RFC8866}}|
+| fingerprint:sha-1 47:5D:A9:48:E4:BA:44:D9:B5:BC:31:AB:4B:80:06:11:3F:D5:F5:38 | {{Section 5 of !RFC8122}} |
+|m=audio 49170 QUIC/RTP/AVP 0 | As defined in {{avp}}|
 |a=quic-datagrams | Expects to use QUIC DATAGRAMs for this audio media stream, as defined in this specification |
-|m=audio 49180 RTP/AVP 0 |Same as {{!RFC8866}}|
-|a=quic-datagrams | Expects to use QUIC DATAGRAMs for this video media stream, as defined in this specification |
-|m=video 51372 QUIC/RTP/AVPF 99 |QUIC transport|
-|a=setup:passive|will wait for QUIC handshake (setup attribute from {{!RFC4145}})|
+|a=rtcp-mux | Will multiplex RTP and RTCP on the same port {{!RFC5761}}|
+|m=audio 49180 QUIC/RTP/AVP 0 |As defined in {{avp}}|
+|a=quic-datagrams | Expects to use QUIC DATAGRAMs for this audio media stream, as defined in this specification |
+|m=video 51372 QUIC/RTP/AVPF 99 | As defined in {{avpf}}|
+|a=setup:passive|Will wait for QUIC handshake (setup attribute from {{!RFC4145}})|
 |a=connection:new|don't want to reuse an existing QUIC connection (connection attribute from {{!RFC4145}})|
 |a=roq-flow-id:2 | RoQ Flow Identifier shall be 2 for streams described by this SDP media description|
-|c=IN IP6 2001:db8::2 |Same as {{!RFC8866}}|
+|c=IN IP6 2001:db8::2 |Same as {{Section 5 of !RFC8866}}|
 |a=rtpmap:99 h266/90000 |H.266 VVC codec {{?I-D.ietf-avtcore-rtp-vvc}}|
 
-This example is largely based on an example appearing in {{!RFC8866}}, Section 5, but is using QUIC/RTP/AVPF to support a newer codec.
-
-Because QUIC uses connections for both streams and datagrams, we are reusing two session- and media-level SDP attributes from {{SDP-attribute-name}} that were defined in {{!RFC4145}} for use with TCP: setup and connection.
+This example is largely based on an example appearing in {{!RFC8866}}, Section 5, but includes the necessary protos and attribute-names for RoQ SDP.
 
 This SDP offer might be included in a SIP INVITE, for example.
 
