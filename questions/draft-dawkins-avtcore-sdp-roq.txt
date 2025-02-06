@@ -406,7 +406,7 @@ Table of Contents
    describes how some existing SDP attribute extensions are reused to
    describe RoQ media flows.
 
-   We have two goals for this section"
+   We have two goals for this section:
 
    *  To describe how existing SDP attributes are used differently in
       order to support RoQ, and
