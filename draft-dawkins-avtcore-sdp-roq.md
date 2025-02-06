@@ -261,12 +261,12 @@ The RoQ flow identifier range is between 0 and 4611686018427387903 (2^62 - 1) (b
 
 This section does not introduce new SDP attribute extensions, but describes how some existing SDP attribute extensions are reused to describe RoQ media flows.
 
-**Editors' Question:** We have two goals for this section. 
+We have two goals for this section"
 
-* To describe how existing SDP attributes are used differently in order to support RoQ, and 
-* To be able to make the statement that other existing SDP attribute extensions can be reused with RoQ, with no special considerations. 
+* To describe how existing SDP attributes are used differently in order to support RoQ, and
+* To be able to make the statement that other existing SDP attribute extensions can be reused with RoQ, with no special considerations.
 
-What other considerations have we missed, that need to be mentioned here?
+**What other considerations have we missed, that need to be mentioned here?**
 
 This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of {{!I-D.ietf-avtcore-rtp-over-quic}}.
 
