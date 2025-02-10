@@ -5,8 +5,8 @@
 Audio/Video Transport Core Maintenance                        S. Dawkins
 Internet-Draft                        Wonder Hamster Internetworking LLC
 Intended status: Experimental                                 V. Pascual
-Expires: 10 August 2025                                            Nokia
-                                                         6 February 2025
+Expires: 14 August 2025                                            Nokia
+                                                        10 February 2025
 
 
                 SDP Offer/Answer for RTP over QUIC (RoQ)
@@ -58,7 +58,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 August 2025.
+   This Internet-Draft will expire on 14 August 2025.
 
 Copyright Notice
 
