@@ -9,19 +9,19 @@ number:
 date:
 consensus: true
 v: 3
-area: "Web and Internet Transport"
-workgroup: "Audio/Video Transport Core Maintenance"
+# area: "Web and Internet Transport"
+# workgroup: "Audio/Video Transport Core Maintenance"
 keyword:
  - RTP over QUIC
  - RoQ
  - SDP
 venue:
-  group: "Audio/Video Transport Core Maintenance"
-  type: "Working Group"
-  mail: "avt@ietf.org"
-  arch: "https://mailarchive.ietf.org/arch/browse/avt/"
+#  group: "Audio/Video Transport Core Maintenance"
+#  type: "Working Group"
+#  mail: "avt@ietf.org"
+#  arch: "https://mailarchive.ietf.org/arch/browse/avt/"
   github: "ietf-wg-avtcore/sdp-roq"
-  latest: "https://github.com/ietf-wg-avtcore/sdp-roq/draft-dawkins-avtcore-sdp-roq.html"
+  latest: "https://ietf-wg-avtcore.github.io/sdp-roq/draft-dawkins-avtcore-sdp-roq.html"
 
 author:
  -
