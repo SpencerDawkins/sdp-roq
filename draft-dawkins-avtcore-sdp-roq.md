@@ -62,9 +62,9 @@ This document describes several new SDP "proto" and "attribute-name" attribute v
 
 The normative descriptions and requirements for RoQ SDP appear in {{idents-atts}}, {{new-attrs}}, and {{special-cons}}.
 
-A sample SDP offer appears in {{offer-example}}.
-
 Non-normative guidance for implementers appears in {{impl-topics}}.
+
+A sample SDP offer appears in {{offer-example}}.
 
 ## Notes for Readers {#readernotes}
 
@@ -201,7 +201,7 @@ The definition of the SDP "quic-datagrams" attribute is:
 
 Attribute name:  quic-datagrams
 
-Type of attribute:  media
+Type of attribute:  session or media
 
 Mux category:  IDENTICAL
 
@@ -233,7 +233,7 @@ The definition of the SDP "roq-flow-id" attribute is:
 
 Attribute name:  roq-flow-id
 
-Type of attribute:  media
+Type of attribute:  session or media
 
 Mux category:  CAUTION
 
@@ -266,7 +266,7 @@ We have two goals for this section:
 * To describe how existing SDP attributes are used differently in order to support RoQ, and
 * To be able to make the statement that other existing SDP attribute extensions can be reused with RoQ, with no special considerations.
 
-**What other considerations have we missed, that need to be mentioned here?**
+**Editors' Note:** What other considerations have we missed, that need to be mentioned here?
 
 This document assumes that an authenticated QUIC connection will be opened using a "roq" ALPN or some other ALPN, as described in Section 4.1 of {{!I-D.ietf-avtcore-rtp-over-quic}}.
 
@@ -288,46 +288,13 @@ Because QUIC itself uses the TLS handshake as described in {{!RFC9001}}, the par
 
 {{!I-D.ietf-avtcore-rtp-over-quic}} defines how RTP and RTCP can be multiplexed onto a single QUIC connection. An application that will perform this multiplexing MUST include the "rtcp-mux" attribute defined in {{!RFC5761}} in its SDP signaling.
 
-# A QUIC/RTP/AVPF Offer Example {#offer-example}
-
-**Editor's Note:** Spencer has been updating this example while working on the document, but we will need to review it carefully, before requesting Working Group Last Call.
-
-A complete example of an SDP offer using QUIC/RTP/AVPF might look like:
-
-|SDP line | Notes |
-|v=0 |Same as {{Section 5 of !RFC8866}}|
-|o=jdoe 3724394400 3724394405 IN IP4 198.51.100.1 |Same as {{Section 5 of !RFC8866}}|
-|s=Call to John Smith |Same as {{Section 5 of !RFC8866}}|
-|i=SDP Offer #1 |Same as {{Section 5 of !RFC8866}}|
-|u=http://www.jdoe.example.com/home.html |Same as {{Section 5 of !RFC8866}}|
-|e=Jane Doe <jane@jdoe.example.com> |Same as {{Section 5 of !RFC8866}}|
-|p=+1 617 555-6011 |Same as {{Section 5 of !RFC8866}}|
-|c=IN IP4 198.51.100.1 |Same as {{Section 5 of !RFC8866}}|
-|t=0 0 |Same as {{Section 5 of !RFC8866}}|
-| fingerprint:sha-1 47:5D:A9:48:E4:BA:44:D9:B5:BC:31:AB:4B:80:06:11:3F:D5:F5:38 | {{Section 5 of !RFC8122}} |
-|m=audio 49170 QUIC/RTP/AVP 0 | As defined in {{avp}}|
-|a=quic-datagrams | Expects to use QUIC DATAGRAMs for this audio media stream, as defined in this specification |
-|a=rtcp-mux | Will multiplex RTP and RTCP on the same port {{!RFC5761}}|
-|m=audio 49180 QUIC/RTP/AVP 0 |As defined in {{avp}}|
-|a=quic-datagrams | Expects to use QUIC DATAGRAMs for this audio media stream, as defined in this specification |
-|m=video 51372 QUIC/RTP/AVPF 99 | As defined in {{avpf}}|
-|a=setup:passive|Will wait for QUIC handshake (setup attribute from {{!RFC4145}})|
-|a=connection:new|don't want to reuse an existing QUIC connection (connection attribute from {{!RFC4145}})|
-|a=roq-flow-id:2 | RoQ Flow Identifier shall be 2 for streams described by this SDP media description|
-|c=IN IP6 2001:db8::2 |Same as {{Section 5 of !RFC8866}}|
-|a=rtpmap:99 h266/90000 |H.266 VVC codec {{?I-D.ietf-avtcore-rtp-vvc}}|
-
-This example is largely based on an example appearing in {{!RFC8866}}, Section 5, but includes the necessary protos and attribute-names for RoQ SDP.
-
-This SDP offer might be included in a SIP INVITE, for example.
-
 # Implementation Topics {#impl-topics}
 
-**Editors' Question:** {{impl-topics}} contains (ought to contain) no normative requirements.
+**Note:** {{impl-topics}} contains no normative requirements.
 
 {{idents-atts}} and {{new-attrs}} of this document provide normative requirements for RoQ endpoints that use SDP for signaling.
 
-Beyond those normative requirements, there are topics that are worth considering as part of implementation work. These topics are not part of "SDP for RoQ", but are gathered here for ease of reference. These topics might be moved into an appendix or a separate "SDP for RoQ Implementation Guide", or even included in the GitHub repository Wiki for this document.
+Beyond those normative requirements, there are topics that are worth considering as part of implementation work, because we have been asked, "but what about the grommet SDP extension?" These topics are not part of the normative "SDP for RoQ" specification, but are gathered here for now. These topics might better appear in an appendix, a separate "SDP for RoQ Implementation Guide", or even best included in the GitHub repository Wiki for this document, because that would allow us to maintain this material on an ongoing basis.
 
 **Editors' Question:** We've been asked about interaction with UDP-Connect to open pinholes in corporate proxies. What is there to say about that, in this specification?
 
@@ -377,6 +344,43 @@ The following considerations are worth reviewing for implementers.
 * QUIC PING frames are entirely under the control of an implementation. If a QUIC connection carries RTP/RTCP traffic, the RTCP transmission interval is likely to suffice for RTP liveness detection, but a wise implementer will look at this in their environment and proceed accordingly.
 * ICE consent freshness, as described in {{Section 4 of ?RFC7675}}, also serves the ICE keepalive function, so ICE keepalives are no longer necessary.
 * At least some RTCP feedback might be unnecessary, as described in {{quic-rtcp}}, so a wise implementer will look at what RTCP feedback can be replaced with QUIC feedback.
+
+# A QUIC/RTP/AVPF Offer Example {#offer-example}
+
+**Editor's Note:** Spencer has been updating this example while working on the document, but we will need to review it carefully, before requesting Working Group Last Call.
+
+**Note:** {{offer-example}} contains no normative requirements.
+
+A complete example of an SDP offer using QUIC/RTP/AVPF might look like:
+
+|---
+|**SDP line** | **Notes** |
+|---
+|**Session Description** | |
+|v=0 |Same as {{Section 5 of !RFC8866}}|
+|o=jdoe 3724394400 3724394405 IN IP4 198.51.100.1 |Same as {{Section 5 of !RFC8866}}|
+|s=Call to John Smith |Same as {{Section 5 of !RFC8866}}|
+|i=SDP Offer #1 |Same as {{Section 5 of !RFC8866}}|
+|u=http://www.jdoe.example.com/home.html |Same as {{Section 5 of !RFC8866}}|
+|e=Jane Doe <jane@jdoe.example.com> |Same as {{Section 5 of !RFC8866}}|
+|p=+1 617 555-6011 |Same as {{Section 5 of !RFC8866}}|
+|c=IN IP4 198.51.100.1 |Same as {{Section 5 of !RFC8866}}|
+|a=quic-datagrams | Expects to use QUIC DATAGRAMs in this RTP session, as defined in this specification |
+|t=0 0 |Same as {{Section 5 of !RFC8866}}|
+|fingerprint:sha-1 47:5D:A9:48:E4:BA:44:D9:B5:BC:31:AB:4B:80:06:11:3F:D5:F5:38 | {{Section 5 of !RFC8122}} |
+|---
+|**Media Description** | |
+|m=video 51372 QUIC/RTP/AVPF 99 | As defined in {{avpf}}|
+|a=rtcp-mux | Will multiplex RTP and RTCP on the same port {{!RFC5761}}|
+|a=roq-flow-id:4 | RoQ Flow Identifier shall be 4 for streams described by this SDP media description|
+|c=IN IP6 2001:db8::2 |Same as {{Section 5 of !RFC8866}}|
+|a=rtpmap:99 h266/90000 |H.266 VVC codec {{?I-D.ietf-avtcore-rtp-vvc}}|
+|===
+
+
+This example is largely based on an example appearing in {{!RFC8866}}, Section 5, but includes the necessary protos and attribute-names for RoQ SDP.
+
+This SDP offer might be included in a SIP INVITE, for example.
 
 # Security Considerations
 
